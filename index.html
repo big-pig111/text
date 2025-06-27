@@ -7,113 +7,192 @@
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-  <style type="text/tailwindcss">
-    @theme {
-      --color-primary: #6366f1;
-      --color-secondary: #8b5cf6;
-      --color-accent: #f59e0b;
-      --color-dark: #0f172a;
-      --color-darker: #020617;
-      --font-inter: 'Inter', sans-serif;
+  <style>
+    :root {
+      --gold-main: #ffe082;
+      --gold-light: #fffbe6;
+      --gold-bg: linear-gradient(135deg, #fffde7 0%, #fffbe6 40%, #ffe082 100%);
+      --gold-border: #e6c155;
+      --gold-shadow: 0 4px 32px rgba(230, 193, 85, 0.10);
+      --gold-font: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
     }
-    
-    @utility fade-in {
-      animation: fadeIn 0.5s ease-in-out;
+    html, body {
+      height: 100%;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
     }
-    
-    @utility slide-up {
-      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    body {
+      font-family: var(--gold-font);
+      background: linear-gradient(120deg, #fffde7 0%, #fffbe6 30%, #ffe082 100%);
+      min-height: 100vh;
+      color: #7c6a2c;
+      display: flex;
+      flex-direction: column;
     }
-    
-    @utility pulse-effect {
-      animation: pulse 2s infinite;
+    main {
+      flex: 1 0 auto;
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    footer {
+      flex-shrink: 0;
     }
-    
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    .main-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: var(--gold-shadow);
+      border: 2px solid var(--gold-border);
+      padding: 56px 32px 48px 32px;
+      max-width: 800px;
+      margin: 12px auto 16px auto;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
+    .main-card h2 {
+      color: #bfae6a;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.7em;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px #fffbe6;
+      display: flex;
+      align-items: center;
     }
-    
-    .block-chain::before {
-      content: '';
-      position: absolute;
-      left: 1.5rem;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+    .main-card input, .main-card textarea {
+      font-family: var(--gold-font);
+      background: #fffbe6;
+      border: 2px solid var(--gold-border);
+      border-radius: 12px;
+      font-size: 1rem;
+      padding: 12px 18px;
+      margin-bottom: 10px;
+      transition: border 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 4px #ffe08244 inset;
+      color: #7c6a2c;
+      width: 100%;
+      box-sizing: border-box;
     }
-    
-    .block-item {
-      position: relative;
+    .main-card input:focus, .main-card textarea:focus {
+      border: 2.5px solid #bfae6a;
+      box-shadow: 0 2px 8px #e6d8a3;
+      outline: none;
     }
-    
-    .block-item::before {
-      content: '';
-      position: absolute;
-      left: 1.2rem;
-      top: 1rem;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--color-primary);
-      border: 2px solid var(--color-darker);
+    .main-card textarea {
+      min-height: 340px;
+      max-height: 480px;
+      resize: vertical;
     }
-    
-    .hash-value {
-      font-family: 'Courier New', monospace;
-      font-size: 0.8rem;
-      color: var(--color-secondary);
-      user-select: all;
-    }
-    
     .btn-primary {
-      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-      transition: all 0.3s ease;
+      background: linear-gradient(90deg, #ffe082 0%, #fffbe6 100%);
+      color: #7c6a2c;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 0;
+      font-size: 1rem;
+      font-family: var(--gold-font);
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 2px 8px #e6d8a344;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      justify-content: center;
+      min-width: 220px;
+      max-width: 100%;
     }
-    
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+      background: linear-gradient(90deg, #fffbe6 0%, #ffe082 100%);
+      color: #bfae6a;
+      box-shadow: 0 4px 16px #e6d8a344;
     }
-    
-    .textarea-focus {
-      @apply border-primary/70 ring-2 ring-primary/30;
+    .btn-wallet {
+      background: linear-gradient(90deg, #ffe082 0%, #fffbe6 100%);
+      color: #7c6a2c;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 0;
+      font-size: 1rem;
+      font-family: var(--gold-font);
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 2px 8px #e6d8a344;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      justify-content: center;
+      min-width: 220px;
+      max-width: 100%;
+    }
+    #wallet-section {
+      margin: 12px 0 0 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #wallet-address {
+      color: #bfae6a;
+      font-size: 1rem;
+      font-family: var(--gold-font);
+      letter-spacing: 1px;
+    }
+    #diary-status {
+      margin-top: 10px;
+      color: #bfae6a;
+      font-size: 0.98rem;
+      font-family: var(--gold-font);
+    }
+    footer {
+      background: #fffbe6;
+      border-top: 1px solid #ffe082;
+      color: #bfae6a;
+      font-size: 0.75rem;
+      padding: 0 0 0 0;
+      margin-top: 0;
+      text-align: center;
+      box-shadow: 0 -1px 4px #ffe08222;
+    }
+    .underline.text-primary { color: #bfae6a !important; }
+    .fa-spinner { color: #bfae6a !important; }
+    /* Loading overlay */
+    #loading-overlay {
+      background: rgba(255, 236, 179, 0.18);
+      backdrop-filter: blur(2px);
+    }
+    #loading-overlay span { color: #bfae6a !important; }
+    /* 顶部左上角logo字体可见性增强 */
+    .logo h1, .logo-text, .text-logo {
+      color: #bfae6a !important;
+      text-shadow: 0 2px 8px #fffbe6, 0 1px 0 #fff;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
     }
   </style>
 </head>
-<body class="font-inter bg-darker text-gray-200 min-h-screen">
+<body>
   <!-- 导航栏 -->
   <nav class="sticky top-0 z-50 bg-darker/80 backdrop-blur-md border-b border-gray-800">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-2">
+    <div class="container mx-auto px-4 py-1 flex justify-between items-center">
+      <div class="flex items-center space-x-2 logo">
         <i class="fas fa-link text-primary text-2xl"></i>
-        <h1 class="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">ChainDiary</h1>
+        <h1 class="logo-text">ChainDiary</h1>
       </div>
-      <div class="flex items-center space-x-4">
-        <button class="hidden md:block px-4 py-2 rounded-md hover:bg-gray-800 transition">
-          <i class="fas fa-cloud-download-alt mr-1"></i> 导出区块链
-        </button>
-        <button class="px-4 py-2 rounded-md btn-primary flex items-center">
-          <i class="fas fa-plus mr-2"></i> 新建日记
-        </button>
-      </div>
+      <!-- 右上角按钮已移除 -->
     </div>
   </nav>
 
   <!-- 主内容区：仅保留链上日记编辑器和钱包连接 -->
-  <main class="container mx-auto px-4 py-4">
-    <div class="max-w-2xl mx-auto bg-darker border border-gray-800 rounded-xl p-8 shadow-lg min-h-[520px] flex flex-col justify-start">
+  <main>
+    <div class="main-card">
       <h2 class="text-xl font-semibold mb-4 flex items-center">
         <i class="fas fa-feather-alt text-primary mr-2"></i> 记录你的区块链日记
       </h2>
@@ -121,17 +200,14 @@
         <input type="text" id="diary-title" placeholder="添加日记标题 (可选)" 
                class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none textarea-focus transition">
         <textarea id="diary-content" placeholder="在这里写下你的心情、经历... (支持Markdown)" 
-                  class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-4 h-64 focus:outline-none textarea-focus transition resize-vertical"
-                  rows="12"></textarea>
-        <div class="flex flex-wrap gap-2">
-          <button id="add-diary" class="btn-primary px-6 py-2 flex items-center">
+                  class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-4 focus:outline-none textarea-focus transition resize-vertical" style="height: 480px;" rows="20"></textarea>
+        <div class="flex flex-col gap-2">
+          <button id="add-diary" class="btn-primary flex items-center">
             <i class="fas fa-chain mr-2"></i> 上链保存
           </button>
+          <button id="connect-wallet-btn" class="btn-wallet flex items-center"><i class="fas fa-wallet mr-2"></i>连接 Phantom 钱包</button>
+          <span id="wallet-address" class="ml-4 text-primary"></span>
         </div>
-      </div>
-      <div id="wallet-section" class="mb-4 mt-6">
-        <button id="connect-wallet-btn" class="btn-primary flex items-center"><i class="fas fa-wallet mr-2"></i>连接 Phantom 钱包</button>
-        <span id="wallet-address" class="ml-4 text-primary"></span>
       </div>
       <div id="diary-status" class="status mt-2 text-sm"></div>
     </div>
