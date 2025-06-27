@@ -112,17 +112,17 @@
   </nav>
 
   <!-- 主内容区：仅保留链上日记编辑器和钱包连接 -->
-  <main class="container mx-auto px-4 py-8">
-    <div class="max-w-2xl mx-auto bg-darker border border-gray-800 rounded-xl p-6 shadow-lg">
+  <main class="container mx-auto px-4 py-4">
+    <div class="max-w-2xl mx-auto bg-darker border border-gray-800 rounded-xl p-8 shadow-lg min-h-[520px] flex flex-col justify-start">
       <h2 class="text-xl font-semibold mb-4 flex items-center">
         <i class="fas fa-feather-alt text-primary mr-2"></i> 记录你的区块链日记
       </h2>
-      <div class="space-y-4">
+      <div class="space-y-4 flex-1 flex flex-col">
         <input type="text" id="diary-title" placeholder="添加日记标题 (可选)" 
                class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none textarea-focus transition">
         <textarea id="diary-content" placeholder="在这里写下你的心情、经历... (支持Markdown)" 
-                  class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 h-40 focus:outline-none textarea-focus transition"
-                  rows="5"></textarea>
+                  class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-4 h-64 focus:outline-none textarea-focus transition resize-vertical"
+                  rows="12"></textarea>
         <div class="flex flex-wrap gap-2">
           <button id="add-diary" class="btn-primary px-6 py-2 flex items-center">
             <i class="fas fa-chain mr-2"></i> 上链保存
@@ -138,10 +138,10 @@
   </main>
 
   <!-- 底部 -->
-  <footer class="bg-darker/90 border-t border-gray-800 mt-12 py-6">
-    <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+  <footer class="bg-darker/90 border-t border-gray-800 mt-4 py-2">
+    <div class="container mx-auto px-4 text-center text-gray-500 text-xs">
       <p>ChainDiary © 2025 | 基于区块链技术的去中心化日记平台</p>
-      <p class="mt-2">每篇日记都是一个不可篡改的区块，记录你的数字人生</p>
+      <p class="mt-1">每篇日记都是一个不可篡改的区块，记录你的数字人生</p>
     </div>
   </footer>
 
