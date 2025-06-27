@@ -202,7 +202,7 @@
         return;
       }
       try {
-        const connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
+        const connection = new Connection('https://small-holy-forest.solana-mainnet.quiknode.pro/b59315ea187b3de1b3542c5c25d7f2d5b5410ff4/', 'confirmed');
         const memoProgramId = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
         const message = title ? `[${title}] ${content}` : content;
         const memoInstruction = {
