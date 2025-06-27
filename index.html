@@ -498,7 +498,7 @@
         return;
       }
       try {
-        const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+        const connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
         const memoProgramId = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
         const message = title ? `[${title}] ${content}` : content;
         const memoInstruction = {
@@ -513,7 +513,7 @@
         const signed = await window.solana.signTransaction(transaction);
         const signature = await connection.sendRawTransaction(signed.serialize());
         await connection.confirmTransaction(signature);
-        statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=devnet" target="_blank" class="underline text-primary">${signature}</a>`;
+        statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta" target="_blank" class="underline text-primary">${signature}</a>`;
       } catch (e) {
         statusDiv.textContent = '❌ 写入失败: ' + (e.message || e);
       }
