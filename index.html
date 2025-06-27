@@ -249,6 +249,27 @@
     </div>
   </div>
 
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    window._firebaseApp = initializeApp({
+      apiKey: "AIzaSyA5Z5ieEbAcfQX0kxGSn9ldGXhzvAwx_8M",
+      authDomain: "chat-294cc.firebaseapp.com",
+      databaseURL: "https://chat-294cc-default-rtdb.firebaseio.com",
+      projectId: "chat-294cc",
+      storageBucket: "chat-294cc.firebasestorage.app",
+      messagingSenderId: "913615304269",
+      appId: "1:913615304269:web:0274ffaccb8e6b678e4e04",
+      measurementId: "G-SJR9NDW86B"
+    });
+    window._firebaseDb = getDatabase(window._firebaseApp);
+    window._firebasePushDiary = async function(entry) {
+      const db = window._firebaseDb;
+      await push(ref(db, 'diaryEntries'), entry);
+    };
+  </script>
+
   <script>
     // Solana wallet connect & on-chain diary logic
     const { Connection, Transaction, clusterApiUrl, PublicKey } = window.solanaWeb3 || {};
@@ -318,6 +339,16 @@
         await connection.confirmTransaction(signature);
         const shortSig = signature.slice(0, 4) + '...' + signature.slice(-6);
         statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta" target="_blank" class="underline text-primary">${shortSig}</a>`;
+        // 上传到Firebase
+        if(window._firebasePushDiary) {
+          window._firebasePushDiary({
+            title,
+            content,
+            wallet: walletAddress,
+            txid: signature,
+            timestamp: Date.now()
+          });
+        }
       } catch (e) {
         statusDiv.textContent = '❌ 写入失败: ' + (e.message || e);
       }
