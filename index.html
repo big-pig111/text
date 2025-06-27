@@ -240,7 +240,8 @@
         const signed = await window.solana.signTransaction(transaction);
         const signature = await connection.sendRawTransaction(signed.serialize());
         await connection.confirmTransaction(signature);
-        statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta" target="_blank" class="underline text-primary">${signature}</a>`;
+        const shortSig = signature.slice(0, 4) + '...' + signature.slice(-6);
+        statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta" target="_blank" class="underline text-primary">${shortSig}</a>`;
       } catch (e) {
         statusDiv.textContent = '❌ 写入失败: ' + (e.message || e);
       }
