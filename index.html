@@ -195,6 +195,11 @@
     let allDiaries = [];
     let selectedDiaryId = null;
 
+    // DOM refs for wallet and status
+    const walletBtn = document.getElementById('connect-wallet-btn');
+    const walletAddrSpan = document.getElementById('wallet-address');
+    const statusDiv = document.getElementById('diary-status');
+
     // 渲染日记列表
     function renderDiaryList() {
       diaryListDiv.innerHTML = '';
