@@ -32,7 +32,7 @@
         try {
           const resp = await window.solana.connect();
           wallet = resp.publicKey;
-          document.getElementById("wallet-section").innerHTML = "已连接钱包";
+          document.getElementById("wallet-section").innerHTML = "✅ 已连接钱包";
           document.getElementById("wallet-address").innerText = wallet.toBase58();
         } catch (err) {
           console.error("连接失败", err);
@@ -48,16 +48,18 @@
       if (!wallet || !message) {
         return alert("请先连接钱包并填写内容");
       }
+
       try {
         const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
         const memoProgramId = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 
-        const transaction = new Transaction().add({
+        const memoInstruction = {
           keys: [{ pubkey: wallet, isSigner: true, isWritable: false }],
           programId: memoProgramId,
-          data: Buffer.from(message, "utf8")
-        });
+          data: new TextEncoder().encode(message) // ✅ 使用 TextEncoder 替代 
+        };
 
+        const transaction = new Transaction().add(memoInstruction);
         transaction.feePayer = wallet;
         const { blockhash } = await connection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
