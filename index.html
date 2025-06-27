@@ -166,7 +166,6 @@
   </div>
 
   <script type="module">
-    // Ensure DOM is loaded before binding
     document.addEventListener('DOMContentLoaded', () => {
       const walletBtn = document.getElementById('connect-wallet-btn');
       const walletAddrSpan = document.getElementById('wallet-address');
@@ -183,19 +182,25 @@
             walletBtn.textContent = '✅ 已连接钱包';
             walletBtn.disabled = true;
             walletAddrSpan.textContent = walletAddress;
+            return true;
           } catch (err) {
             statusDiv.textContent = '连接失败: ' + err.message;
+            return false;
           }
         } else {
           alert('请安装 Phantom 钱包');
+          return false;
         }
       }
       walletBtn.addEventListener('click', connectWallet);
 
       async function sendMemoToSolana(title, content) {
         if (!wallet) {
-          alert('请先连接钱包');
-          return;
+          const connected = await connectWallet();
+          if (!connected || !wallet) {
+            alert('请先连接钱包');
+            return;
+          }
         }
         if (!content) {
           alert('日记内容不能为空！');
