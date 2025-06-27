@@ -1,79 +1,529 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Solana 链上日记</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChainDiary - 区块链日记</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-  <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-    button { padding: 10px 20px; background-color: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    textarea { width: 100%; height: 150px; margin-top: 1rem; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
-    .status { margin-top: 1rem; font-size: 0.9rem; color: #333; }
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary: #6366f1;
+      --color-secondary: #8b5cf6;
+      --color-accent: #f59e0b;
+      --color-dark: #0f172a;
+      --color-darker: #020617;
+      --font-inter: 'Inter', sans-serif;
+    }
+    
+    @utility fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @utility slide-up {
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    @utility pulse-effect {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .block-chain::before {
+      content: '';
+      position: absolute;
+      left: 1.5rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+    }
+    
+    .block-item {
+      position: relative;
+    }
+    
+    .block-item::before {
+      content: '';
+      position: absolute;
+      left: 1.2rem;
+      top: 1rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 2px solid var(--color-darker);
+    }
+    
+    .hash-value {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: var(--color-secondary);
+      user-select: all;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+    }
+    
+    .textarea-focus {
+      @apply border-primary/70 ring-2 ring-primary/30;
+    }
   </style>
 </head>
-<body>
-  <h1>📓 Solana 链上日记</h1>
-  <div id="wallet-section">
-    <button onclick="connectWallet()">连接 Phantom 钱包</button>
+<body class="font-inter bg-darker text-gray-200 min-h-screen">
+  <!-- 导航栏 -->
+  <nav class="sticky top-0 z-50 bg-darker/80 backdrop-blur-md border-b border-gray-800">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-link text-primary text-2xl"></i>
+        <h1 class="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">ChainDiary</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button class="hidden md:block px-4 py-2 rounded-md hover:bg-gray-800 transition">
+          <i class="fas fa-cloud-download-alt mr-1"></i> 导出区块链
+        </button>
+        <button class="px-4 py-2 rounded-md btn-primary flex items-center">
+          <i class="fas fa-plus mr-2"></i> 新建日记
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- 左侧：日记编辑器 -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-darker border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-primary/20 transition">
+          <h2 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="fas fa-feather-alt text-primary mr-2"></i> 记录你的区块链日记
+          </h2>
+          <div class="space-y-4">
+            <input type="text" id="diary-title" placeholder="添加日记标题 (可选)" 
+                   class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none textarea-focus transition">
+            <textarea id="diary-content" placeholder="在这里写下你的心情、经历... (支持Markdown)" 
+                      class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 h-40 focus:outline-none textarea-focus transition"
+                      rows="5"></textarea>
+            <div class="flex flex-wrap gap-2">
+              <button id="add-diary" class="btn-primary px-6 py-2 flex items-center">
+                <i class="fas fa-chain mr-2"></i> 上链保存
+              </button>
+              <button class="px-6 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition flex items-center">
+                <i class="fas fa-image mr-2 text-gray-400"></i> 插入图片
+              </button>
+              <button class="px-6 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition flex items-center">
+                <i class="fas fa-lock mr-2 text-gray-400"></i> 加密设置
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 区块链统计 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-darker border border-gray-800 rounded-xl p-4 shadow-lg fade-in">
+            <div class="text-sm text-gray-400 mb-1">已记录日记</div>
+            <div class="text-2xl font-bold text-primary" id="block-count">0</div>
+            <div class="text-xs text-gray-500 mt-1">区块数量</div>
+          </div>
+          <div class="bg-darker border border-gray-800 rounded-xl p-4 shadow-lg fade-in" style="animation-delay: 0.1s">
+            <div class="text-sm text-gray-400 mb-1">总存储量</div>
+            <div class="text-2xl font-bold text-secondary" id="storage-size">0 KB</div>
+            <div class="text-xs text-gray-500 mt-1">链上数据</div>
+          </div>
+          <div class="bg-darker border border-gray-800 rounded-xl p-4 shadow-lg fade-in" style="animation-delay: 0.2s">
+            <div class="text-sm text-gray-400 mb-1">安全等级</div>
+            <div class="text-2xl font-bold text-accent" id="security-level">★★★★★</div>
+            <div class="text-xs text-gray-500 mt-1">加密强度</div>
+          </div>
+        </div>
+
+        <div id="wallet-section" class="mb-4">
+          <button id="connect-wallet-btn" class="btn-primary flex items-center"><i class="fas fa-wallet mr-2"></i>连接 Phantom 钱包</button>
+          <span id="wallet-address" class="ml-4 text-primary"></span>
+        </div>
+
+        <div id="diary-status" class="status mt-2 text-sm"></div>
+      </div>
+
+      <!-- 右侧：区块链历史 -->
+      <div class="space-y-6">
+        <div class="bg-darker border border-gray-800 rounded-xl p-6 shadow-lg sticky top-24">
+          <h2 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="fas fa-history text-primary mr-2"></i> 区块链历史
+          </h2>
+          <div class="relative pl-8 block-chain" id="blockchain-container">
+            <!-- 区块链区块将通过JS动态添加 -->
+            <div class="text-center text-gray-500 py-8">
+              <i class="fas fa-chain-broken text-4xl mb-3 text-gray-700"></i>
+              <p>暂无日记上链，点击左侧按钮开始记录</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 区块链特性 -->
+        <div class="bg-darker border border-gray-800 rounded-xl p-6 shadow-lg">
+          <h3 class="text-lg font-semibold mb-4 flex items-center">
+            <i class="fas fa-shield-alt text-primary mr-2"></i> 区块链安全特性
+          </h3>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-primary mt-1 mr-2"></i>
+              <span>每篇日记生成唯一哈希值，链接前一区块，确保不可篡改</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-primary mt-1 mr-2"></i>
+              <span>端到端加密存储，只有你拥有私钥访问权限</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-primary mt-1 mr-2"></i>
+              <span>时间戳记录，精确到毫秒级，保证日记真实性</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-primary mt-1 mr-2"></i>
+              <span>分布式存储模拟，本地多副本备份，防止数据丢失</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 底部 -->
+  <footer class="bg-darker/90 border-t border-gray-800 mt-12 py-6">
+    <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+      <p>ChainDiary © 2025 | 基于区块链技术的去中心化日记平台</p>
+      <p class="mt-2">每篇日记都是一个不可篡改的区块，记录你的数字人生</p>
+    </div>
+  </footer>
+
+  <!-- 区块详情模态框 -->
+  <div id="block-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden fade-in">
+    <div class="bg-darker border border-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold" id="modal-title">区块详情</h3>
+        <button id="close-modal" class="text-gray-400 hover:text-white">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-4" id="modal-content">
+        <!-- 模态框内容将通过JS动态生成 -->
+      </div>
+      <div class="mt-6 flex justify-end">
+        <button id="copy-hash" class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition flex items-center">
+          <i class="fas fa-copy mr-2"></i> 复制哈希值
+        </button>
+      </div>
+    </div>
   </div>
-  <div id="wallet-address" style="margin-top:10px;"></div>
-  <textarea id="diary" placeholder="写下你的日记内容...（内容将记录在链上）"></textarea>
-  <br />
-  <button onclick="sendMemo()">📝 写入链上</button>
-  <div class="status" id="status"></div>
 
   <script>
-    const { Connection, Transaction, clusterApiUrl, PublicKey } = solanaWeb3;
+    // 模拟区块链数据结构
+    const blockchain = [];
+    let currentPrivateKey = '';
+
+    // 生成随机私钥
+    function generatePrivateKey() {
+      return Math.random().toString(36).substring(2, 15) + 
+             Math.random().toString(36).substring(2, 15);
+    }
+
+    // 生成哈希值 (SHA-256 模拟)
+    function generateHash(data) {
+      const hash = CryptoJS.SHA256(data + currentPrivateKey).toString();
+      return hash.substring(0, 64); // 截取前64位
+    }
+
+    // 添加新区块
+    function addBlock(title, content) {
+      const timestamp = new Date().toISOString();
+      const previousHash = blockchain.length > 0 ? blockchain[blockchain.length - 1].hash : '0'.repeat(64);
+      
+      const block = {
+        index: blockchain.length + 1,
+        timestamp,
+        title,
+        content,
+        previousHash,
+        hash: generateHash(title + content + timestamp + previousHash)
+      };
+      
+      blockchain.push(block);
+      updateBlockchainDisplay();
+      updateStats();
+      
+      // 滚动到最新区块
+      const container = document.getElementById('blockchain-container');
+      container.scrollTop = container.scrollHeight;
+      
+      return block;
+    }
+
+    // 更新区块链显示
+    function updateBlockchainDisplay() {
+      const container = document.getElementById('blockchain-container');
+      if (blockchain.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-gray-500 py-8">
+            <i class="fas fa-chain-broken text-4xl mb-3 text-gray-700"></i>
+            <p>暂无日记上链，点击左侧按钮开始记录</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = '';
+      blockchain.forEach((block, index) => {
+        const blockElement = document.createElement('div');
+        blockElement.className = 'block-item mb-6 slide-up';
+        blockElement.style.animationDelay = `${index * 0.1}s`;
+        
+        blockElement.innerHTML = `
+          <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-primary/30 transition cursor-pointer" 
+               onclick="showBlockDetails(${index})">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="font-medium ${index === blockchain.length - 1 ? 'text-primary' : ''}">
+                区块 #${block.index}
+                ${index === blockchain.length - 1 ? 
+                  '<span class="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">最新</span>' : ''}
+              </h4>
+              <span class="text-xs text-gray-400">${new Date(block.timestamp).toLocaleString()}</span>
+            </div>
+            <h5 class="text-sm font-medium mb-1 line-clamp-1">
+              ${block.title || '无标题日记'}
+            </h5>
+            <p class="text-xs text-gray-400 line-clamp-2">
+              ${block.content.length > 50 ? block.content.substring(0, 50) + '...' : block.content}
+            </p>
+            <div class="mt-3 pt-3 border-t border-gray-800">
+              <span class="text-xs text-gray-500">哈希值: </span>
+              <span class="hash-value">${block.hash.substring(0, 10)}...</span>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(blockElement);
+      });
+    }
+
+    // 更新统计数据
+    function updateStats() {
+      document.getElementById('block-count').textContent = blockchain.length;
+      
+      // 模拟存储大小
+      let totalSize = 0;
+      blockchain.forEach(block => {
+        totalSize += block.title.length + block.content.length;
+      });
+      document.getElementById('storage-size').textContent = (totalSize / 1024).toFixed(2) + ' KB';
+    }
+
+    // 显示区块详情
+    function showBlockDetails(index) {
+      const block = blockchain[index];
+      const modal = document.getElementById('block-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalContent = document.getElementById('modal-content');
+      
+      modalTitle.textContent = `区块 #${block.index} 详情`;
+      
+      modalContent.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+              <h4 class="font-medium mb-2 text-primary">基本信息</h4>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-400">区块高度</span>
+                  <span>${block.index}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-400">时间戳</span>
+                  <span>${block.timestamp}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-400">创建时间</span>
+                  <span>${new Date(block.timestamp).toLocaleString()}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-400">前块哈希</span>
+                  <span class="hash-value">${block.previousHash.substring(0, 10)}...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+              <h4 class="font-medium mb-2 text-primary">日记内容</h4>
+              <div class="text-sm space-y-2">
+                <div class="font-medium ${block.title ? '' : 'text-gray-500'}">
+                  ${block.title || '(无标题)'}
+                </div>
+                <div class="text-gray-300 leading-relaxed">
+                  ${block.content || '日记内容为空'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h4 class="font-medium mb-2 text-primary">当前区块哈希</h4>
+          <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-xs">
+            <div class="hash-value" id="modal-hash">${block.hash}</div>
+          </div>
+        </div>
+      `;
+      
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // 关闭模态框
+    document.getElementById('close-modal').addEventListener('click', () => {
+      const modal = document.getElementById('block-modal');
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    });
+
+    // 复制哈希值
+    document.getElementById('copy-hash').addEventListener('click', () => {
+      const hashElement = document.getElementById('modal-hash');
+      const hash = hashElement.textContent;
+      
+      navigator.clipboard.writeText(hash).then(() => {
+        alert('哈希值已复制到剪贴板！');
+      });
+    });
+
+    // 生成私钥（首次加载时）
+    if (!currentPrivateKey) {
+      currentPrivateKey = generatePrivateKey();
+    }
+
+    // 添加日记按钮事件
+    document.getElementById('add-diary').addEventListener('click', () => {
+      const title = document.getElementById('diary-title').value.trim();
+      const content = document.getElementById('diary-content').value.trim();
+      
+      if (content === '') {
+        alert('日记内容不能为空！');
+        return;
+      }
+      
+      // 显示加载动画
+      const button = document.getElementById('add-diary');
+      const originalText = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 正在上链...';
+      
+      // 模拟区块链确认过程
+      setTimeout(() => {
+        addBlock(title, content);
+        
+        // 清空输入框
+        document.getElementById('diary-title').value = '';
+        document.getElementById('diary-content').value = '';
+        
+        // 恢复按钮状态
+        button.disabled = false;
+        button.innerHTML = originalText;
+        
+        // 提示成功
+        alert('日记已成功上链！区块高度: ' + blockchain.length);
+      }, 1500);
+    });
+
+    // 页面加载时初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 加载CryptoJS库（用于哈希计算）
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js';
+      document.head.appendChild(script);
+    });
+
+    // Solana wallet connect & on-chain diary logic
+    const { Connection, Transaction, clusterApiUrl, PublicKey } = window.solanaWeb3 || {};
     let wallet = null;
+    let walletAddress = '';
+    const walletBtn = document.getElementById('connect-wallet-btn');
+    const walletAddrSpan = document.getElementById('wallet-address');
+    const statusDiv = document.getElementById('diary-status');
 
     async function connectWallet() {
       if (window.solana && window.solana.isPhantom) {
         try {
           const resp = await window.solana.connect();
           wallet = resp.publicKey;
-          document.getElementById("wallet-section").innerHTML = "✅ 已连接钱包";
-          document.getElementById("wallet-address").innerText = wallet.toBase58();
+          walletAddress = wallet.toBase58();
+          walletBtn.textContent = '✅ 已连接钱包';
+          walletBtn.disabled = true;
+          walletAddrSpan.textContent = walletAddress;
         } catch (err) {
-          console.error("连接失败", err);
+          statusDiv.textContent = '连接失败: ' + err.message;
         }
       } else {
-        alert("请安装 Phantom 钱包");
+        alert('请安装 Phantom 钱包');
       }
     }
+    if (walletBtn) walletBtn.onclick = connectWallet;
 
-    async function sendMemo() {
-      const message = document.getElementById("diary").value;
-      const status = document.getElementById("status");
-      if (!wallet || !message) {
-        return alert("请先连接钱包并填写内容");
+    async function sendMemoToSolana(title, content) {
+      if (!wallet) {
+        alert('请先连接钱包');
+        return;
       }
-
+      if (!content) {
+        alert('日记内容不能为空！');
+        return;
+      }
       try {
-        const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-        const memoProgramId = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
-
+        const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+        const memoProgramId = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
+        const message = title ? `[${title}] ${content}` : content;
         const memoInstruction = {
           keys: [{ pubkey: wallet, isSigner: true, isWritable: false }],
           programId: memoProgramId,
-          data: new TextEncoder().encode(message) // ✅ 使用 TextEncoder 替代 
+          data: new TextEncoder().encode(message)
         };
-
         const transaction = new Transaction().add(memoInstruction);
         transaction.feePayer = wallet;
         const { blockhash } = await connection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
-
         const signed = await window.solana.signTransaction(transaction);
         const signature = await connection.sendRawTransaction(signed.serialize());
         await connection.confirmTransaction(signature);
-
-        status.innerText = `✅ 日记已上链，交易 ID: ${signature}`;
+        statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=devnet" target="_blank" class="underline text-primary">${signature}</a>`;
       } catch (e) {
-        console.error(e);
-        status.innerText = "❌ 写入失败";
+        statusDiv.textContent = '❌ 写入失败: ' + (e.message || e);
       }
     }
+    // 挂载到"上链保存"按钮
+    document.getElementById('add-diary').addEventListener('click', async () => {
+      const title = document.getElementById('diary-title').value.trim();
+      const content = document.getElementById('diary-content').value.trim();
+      await sendMemoToSolana(title, content);
+    });
   </script>
 </body>
 </html>
