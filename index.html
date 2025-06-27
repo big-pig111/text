@@ -165,14 +165,87 @@
     </div>
   </div>
 
-  <script>
-    // Solana wallet connect & on-chain diary logic
-    const { Connection, Transaction, clusterApiUrl, PublicKey } = window.solanaWeb3 || {};
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5Z5ieEbAcfQX0kxGSn9ldGXhzvAwx_8M",
+      authDomain: "chat-294cc.firebaseapp.com",
+      databaseURL: "https://chat-294cc-default-rtdb.firebaseio.com",
+      projectId: "chat-294cc",
+      storageBucket: "chat-294cc.firebasestorage.app",
+      messagingSenderId: "913615304269",
+      appId: "1:913615304269:web:0274ffaccb8e6b678e4e04",
+      measurementId: "G-SJR9NDW86B"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // UI refs
+    const diaryListPanel = document.createElement('div');
+    diaryListPanel.id = 'diary-list-panel';
+    diaryListPanel.className = 'fixed top-20 right-0 w-96 h-[calc(100vh-5rem)] bg-gray-900 border-l border-gray-800 shadow-xl overflow-y-auto p-4 z-40';
+    diaryListPanel.innerHTML = `<h3 class="text-lg font-bold mb-4 text-primary flex items-center"><i class="fas fa-book-open mr-2"></i>我的链上日记</h3><div id="diary-list" class="space-y-3"></div>`;
+    document.body.appendChild(diaryListPanel);
+    const diaryListDiv = diaryListPanel.querySelector('#diary-list');
+
     let wallet = null;
     let walletAddress = '';
-    const walletBtn = document.getElementById('connect-wallet-btn');
-    const walletAddrSpan = document.getElementById('wallet-address');
-    const statusDiv = document.getElementById('diary-status');
+    let allDiaries = [];
+    let selectedDiaryId = null;
+
+    // 渲染日记列表
+    function renderDiaryList() {
+      diaryListDiv.innerHTML = '';
+      if (!allDiaries.length) {
+        diaryListDiv.innerHTML = '<div class="text-gray-500 text-center py-8">暂无链上日记</div>';
+        return;
+      }
+      allDiaries.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = `rounded-lg p-4 bg-gray-800 border border-gray-700 shadow-sm cursor-pointer transition hover:border-primary/70 ${item._id===selectedDiaryId?'ring-2 ring-primary':''}`;
+        card.innerHTML = `
+          <div class="flex justify-between items-center mb-1">
+            <div class="font-semibold text-primary line-clamp-1">${item.title ? item.title : '(无标题)'}</div>
+            <a href="${item.txUrl}" target="_blank" class="text-xs text-blue-400 underline ml-2" title="区块链交易">Tx</a>
+          </div>
+          <div class="text-xs text-gray-400 mb-1">${new Date(item.timestamp).toLocaleString()}</div>
+          <div class="text-sm text-gray-300 line-clamp-2">${item.content.length>40?item.content.slice(0,40)+'...':item.content}</div>
+        `;
+        card.onclick = () => {
+          selectedDiaryId = item._id;
+          renderDiaryList();
+          // 显示到主编辑区
+          document.getElementById('diary-title').value = item.title || '';
+          document.getElementById('diary-content').value = item.content || '';
+        };
+        diaryListDiv.appendChild(card);
+      });
+    }
+
+    // 加载日记
+    async function loadMyDiaries() {
+      if (!walletAddress) return;
+      const snapshot = await get(child(ref(db), `diaries/${walletAddress}`));
+      allDiaries = [];
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        allDiaries = Object.entries(data).map(([k, v]) => ({...v, _id:k})).sort((a,b)=>b.timestamp-a.timestamp);
+      }
+      renderDiaryList();
+    }
+
+    // 监听钱包连接
+    window.addEventListener('wallet-connected', e => {
+      walletAddress = e.detail;
+      loadMyDiaries();
+    });
+
+    // 监听新日记写入
+    window.addEventListener('diary-added', () => {
+      loadMyDiaries();
+    });
 
     async function connectWallet() {
       if (window.solana && window.solana.isPhantom) {
@@ -183,6 +256,7 @@
           walletBtn.textContent = '✅ 已连接钱包';
           walletBtn.disabled = true;
           walletAddrSpan.textContent = walletAddress;
+          window.dispatchEvent(new CustomEvent('wallet-connected', { detail: walletAddress }));
         } catch (err) {
           statusDiv.textContent = '连接失败: ' + err.message;
         }
@@ -218,6 +292,17 @@
         const signature = await connection.sendRawTransaction(signed.serialize());
         await connection.confirmTransaction(signature);
         statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta" target="_blank" class="underline text-primary">${signature}</a>`;
+        // 写入 Firebase
+        const db = getDatabase(app);
+        const diaryRef = ref(db, `diaries/${walletAddress}`);
+        await push(diaryRef, {
+          title,
+          content,
+          txid: signature,
+          txUrl: `https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta`,
+          timestamp: Date.now()
+        });
+        window.dispatchEvent(new CustomEvent('diary-added'));
       } catch (e) {
         statusDiv.textContent = '❌ 写入失败: ' + (e.message || e);
       }
