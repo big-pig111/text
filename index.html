@@ -1,262 +1,303 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChainDiary - 区块链日记</title>
-  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-  <style>
-    :root {
-      --gold-main: #ffe082;
-      --gold-light: #fffbe6;
-      --gold-bg: linear-gradient(135deg, #fffde7 0%, #fffbe6 40%, #ffe082 100%);
-      --gold-border: #e6c155;
-      --gold-shadow: 0 4px 32px rgba(230, 193, 85, 0.10);
-      --gold-font: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-    }
-    html, body {
-      height: 100%;
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: var(--gold-font);
-      background: linear-gradient(120deg, #fffde7 0%, #fffbe6 30%, #ffe082 100%);
-      min-height: 100vh;
-      color: #7c6a2c;
-      display: flex;
-      flex-direction: column;
-    }
-    main {
-      flex: 1 0 auto;
-    }
-    footer {
-      flex-shrink: 0;
-    }
-    .main-card {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: var(--gold-shadow);
-      border: 2px solid var(--gold-border);
-      padding: 56px 32px 48px 32px;
-      max-width: 800px;
-      margin: 12px auto 16px auto;
-      min-height: 520px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
-    .main-card h2 {
-      color: #bfae6a;
-      font-size: 1.3rem;
-      font-weight: 600;
-      margin-bottom: 0.7em;
-      letter-spacing: 1px;
-      text-shadow: 0 2px 8px #fffbe6;
-      display: flex;
-      align-items: center;
-    }
-    .main-card input, .main-card textarea {
-      font-family: var(--gold-font);
-      background: #fffbe6;
-      border: 2px solid var(--gold-border);
-      border-radius: 12px;
-      font-size: 1rem;
-      padding: 12px 18px;
-      margin-bottom: 10px;
-      transition: border 0.2s, box-shadow 0.2s;
-      box-shadow: 0 1px 4px #ffe08244 inset;
-      color: #7c6a2c;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .main-card input:focus, .main-card textarea:focus {
-      border: 2.5px solid #bfae6a;
-      box-shadow: 0 2px 8px #e6d8a3;
-      outline: none;
-    }
-    .main-card textarea {
-      min-height: 340px;
-      max-height: 480px;
-      resize: vertical;
-    }
-    .btn-primary {
-      background: linear-gradient(90deg, #ffe082 0%, #fffbe6 100%);
-      color: #7c6a2c;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 0;
-      font-size: 1rem;
-      font-family: var(--gold-font);
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-      box-shadow: 0 2px 8px #e6d8a344;
-      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      justify-content: center;
-      min-width: 220px;
-      max-width: 100%;
-    }
-    .btn-primary:hover {
-      background: linear-gradient(90deg, #fffbe6 0%, #ffe082 100%);
-      color: #bfae6a;
-      box-shadow: 0 4px 16px #e6d8a344;
-    }
-    .btn-wallet {
-      background: linear-gradient(90deg, #ffe082 0%, #fffbe6 100%);
-      color: #7c6a2c;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 0;
-      font-size: 1rem;
-      font-family: var(--gold-font);
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-      box-shadow: 0 2px 8px #e6d8a344;
-      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      justify-content: center;
-      min-width: 220px;
-      max-width: 100%;
-    }
-    #wallet-section {
-      margin: 12px 0 0 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    #wallet-address {
-      color: #bfae6a;
-      font-size: 1rem;
-      font-family: var(--gold-font);
-      letter-spacing: 1px;
-    }
-    #diary-status {
-      margin-top: 10px;
-      color: #bfae6a;
-      font-size: 0.98rem;
-      font-family: var(--gold-font);
-    }
-    footer {
-      background: #fffbe6;
-      border-top: 1px solid #ffe082;
-      color: #bfae6a;
-      font-size: 0.75rem;
-      padding: 0 0 0 0;
-      margin-top: 0;
-      text-align: center;
-      box-shadow: 0 -1px 4px #ffe08222;
-    }
-    .underline.text-primary { color: #bfae6a !important; }
-    .fa-spinner { color: #bfae6a !important; }
-    /* Loading overlay */
-    #loading-overlay {
-      background: rgba(255, 236, 179, 0.18);
-      backdrop-filter: blur(2px);
-    }
-    #loading-overlay span { color: #bfae6a !important; }
-    /* 顶部左上角logo字体可见性增强 */
-    .logo h1, .logo-text, .text-logo {
-      color: #bfae6a !important;
-      text-shadow: 0 2px 8px #fffbe6, 0 1px 0 #fff;
-      font-weight: 700;
-      font-size: 1.5rem;
-      letter-spacing: 2px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>链上日记列表 - Blockchain Diary</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 32px 0 32px 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 28px;
+            box-shadow: 0 12px 48px rgba(230, 193, 85, 0.18), 0 2px 8px #ffe08244;
+            padding: 48px 36px 36px 36px;
+            max-width: 1100px;
+            width: 98vw;
+            min-height: 700px;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.6s ease-out;
+        }
+        .diary-list-wrap {
+            position: relative;
+            background: none;
+            border-radius: 18px;
+            box-shadow: none;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        .tab-bar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(255,255,255,0.98);
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+            box-shadow: 0 2px 8px #ffe08222;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            color: #e6c155;
+            margin-bottom: 36px;
+            text-align: center;
+            font-size: 2.8em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 16px #ffe08244, 0 2px 8px #fffbe6;
+        }
+        .diary-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px 18px;
+            justify-content: flex-start;
+            min-height: 700px;
+            max-height: 900px;
+            overflow: auto;
+            padding: 16px;
+        }
+        .diary-card {
+            background: linear-gradient(135deg, #fffbe6 60%, #ffe082 100%);
+            border-radius: 20px;
+            box-shadow: 0 6px 24px rgba(230, 193, 85, 0.16), 0 1.5px 6px #ffe08233;
+            padding: 16px 12px 10px 12px;
+            width: 250px;
+            height: 150px;
+            min-width: 250px;
+            max-width: 250px;
+            min-height: 150px;
+            max-height: 150px;
+            flex: 0 0 250px;
+            cursor: pointer;
+            transition: box-shadow 0.18s, transform 0.18s;
+            position: relative;
+            border: 2.5px solid #ffe082;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .diary-card:hover {
+            box-shadow: 0 12px 36px rgba(230, 193, 85, 0.22), 0 2px 8px #ffe08255;
+            transform: translateY(-4px) scale(1.025);
+            border-color: #e6c155;
+        }
+        .diary-title-preview {
+            color: #bfae6a;
+            font-size: 1em;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px #fffbe6;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .diary-content-preview {
+            color: #6d5c1c;
+            font-size: 0.98em;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            word-break: break-all;
+            min-height: 30px;
+            max-height: 2.5em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .diary-meta {
+            font-size: 1em;
+            color: #bfa94a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        .diary-meta .author {
+            font-weight: 700;
+            color: #e6c155;
+            font-size: 1.05em;
+            letter-spacing: 0.5px;
+        }
+        .diary-meta .date {
+            font-size: 0.98em;
+            color: #bfa94a;
+        }
+        .empty-tip {
+            text-align: center;
+            color: #bfa94a;
+            margin-top: 60px;
+            font-size: 1.2em;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.25);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: linear-gradient(135deg, #fffde7 60%, #ffe082 100%);
+            border-radius: 22px;
+            box-shadow: 0 12px 48px rgba(230, 193, 85, 0.22), 0 2px 8px #ffe08244;
+            padding: 56px 48px 40px 48px;
+            max-width: 1200px;
+            max-height: 700px;
+            width: 98vw;
+            height: 700px !important;
+            position: relative;
+            animation: fadeIn 0.3s;
+            overflow-y: auto;
+        }
+        .modal-footer {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, #fffbe6 60%, #ffe082 100%);
+            border-bottom-left-radius: 22px;
+            border-bottom-right-radius: 22px;
+            box-shadow: 0 -2px 12px #ffe08233;
+            padding: 18px 48px 14px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.05em;
+            color: #bfa94a;
+            z-index: 2;
+        }
+        .modal-footer .author { color: #e6c155; font-weight: 700; }
+        .modal-footer .date { color: #bfa94a; }
+        .modal-footer a { color: #1976d2; text-decoration: underline; margin-left: 12px; }
+        .modal-close {
+            position: absolute;
+            right: 22px;
+            top: 18px;
+            font-size: 1.7em;
+            color: #e6c155;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .modal-content .diary-content-full {
+            color: #6d5c1c;
+            font-size: 1.18em;
+            line-height: 1.9;
+            margin-bottom: 22px;
+            word-break: break-all;
+            white-space: pre-line;
+        }
+        .modal-content .diary-title-full {
+            color: #bfae6a;
+            font-size: 1.35em;
+            font-weight: 700;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px #fffbe6;
+        }
+        @media (max-width: 900px) {
+            .container { padding: 12px 2vw; }
+            h1 { font-size: 2em; }
+            .diary-list { gap: 10px; }
+            .diary-card { min-width: 90vw; max-width: 98vw; padding: 16px 8px 10px 8px; }
+            .modal-footer { padding: 12px 10px 10px 10px; font-size: 0.98em; }
+        }
+        .top-btn {
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            padding: 10px 28px;
+            font-size: 1.08em;
+            min-width: 120px;
+            box-shadow: 0 4px 18px #e6c15533, 0 1.5px 6px #ffe08233;
+            cursor: pointer;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .top-btn.create {
+            background: linear-gradient(90deg, #fffde7 0%, #ffe082 100%);
+            color: #bfae6a;
+        }
+        .top-btn.create:hover {
+            background: linear-gradient(90deg, #ffe082 0%, #fffde7 100%);
+            color: #e6c155;
+            box-shadow: 0 8px 32px #ffe08255;
+            transform: translateY(-2px) scale(1.04);
+        }
+        .top-btn.wallet {
+            background: linear-gradient(90deg, #e6c155 0%, #fffbe6 100%);
+            color: #fff;
+        }
+        .top-btn.wallet:hover {
+            background: linear-gradient(90deg, #fffbe6 0%, #e6c155 100%);
+            color: #bfae6a;
+            box-shadow: 0 8px 32px #e6c15555;
+            transform: translateY(-2px) scale(1.04);
+        }
+        .tab-btn {
+            background: #fffbe6 !important;
+            color: #bfae6a !important;
+            font-weight: 700;
+            border: none;
+            box-shadow: 0 2px 8px #ffe08222;
+            transition: all 0.18s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(90deg, #ffe082 0%, #ffe082 100%) !important;
+            color: #fff !important;
+            font-weight: 900 !important;
+            box-shadow: 0 4px 16px #e6c15588 !important;
+            border: 2.5px solid #e6c155 !important;
+            transform: scale(1.04);
+        }
+    </style>
 </head>
 <body>
-  <!-- 导航栏 -->
-  <nav class="sticky top-0 z-50 bg-darker/80 backdrop-blur-md border-b border-gray-800">
-    <div class="container mx-auto px-4 py-1 flex justify-between items-center">
-      <div class="flex items-center space-x-2 logo">
-        <i class="fas fa-link text-primary text-2xl"></i>
-        <h1 class="logo-text">ChainDiary</h1>
-      </div>
-      <!-- 右上角按钮已移除 -->
+    <div style="position:fixed;top:24px;right:36px;z-index:100;display:flex;gap:18px;">
+      <button id="create-diary-btn" class="top-btn create">创建日记</button>
+      <button id="global-wallet-btn" class="top-btn wallet">连接钱包</button>
     </div>
-  </nav>
-
-  <!-- 主内容区：仅保留链上日记编辑器和钱包连接 -->
-  <main>
-    <div class="main-card">
-      <h2 class="text-xl font-semibold mb-4 flex items-center">
-        <i class="fas fa-feather-alt text-primary mr-2"></i> 记录你的区块链日记
-      </h2>
-      <div class="space-y-4 flex-1 flex flex-col">
-        <input type="text" id="diary-title" placeholder="添加日记标题 (可选)" 
-               class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none textarea-focus transition">
-        <textarea id="diary-content" placeholder="在这里写下你的心情、经历... (支持Markdown)" 
-                  class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-4 focus:outline-none textarea-focus transition resize-vertical" style="height: 480px;" rows="20"></textarea>
-        <label style="display:flex;align-items:center;margin-bottom:8px;font-size:1.05em;color:#bfae6a;font-weight:500;gap:8px;">
-          <input type="checkbox" id="diary-public" checked style="width:18px;height:18px;"> 公开（所有人可见）
-        </label>
-        <div class="flex flex-col gap-2">
-          <button id="add-diary" class="btn-primary flex items-center">
-            <i class="fas fa-chain mr-2"></i> 上链保存
-          </button>
-          <button id="connect-wallet-btn" class="btn-wallet flex items-center"><i class="fas fa-wallet mr-2"></i>连接 Phantom 钱包</button>
-          <span id="wallet-address" class="ml-4 text-primary"></span>
+    <div class="container">
+        <h1>链上日记列表</h1>
+        <div class="diary-list-wrap">
+          <div class="tab-bar" id="tabBar" style="display:flex;gap:18px;justify-content:center;margin-bottom:0;">
+            <button id="tab-public" class="tab-btn active" style="font-size:1.1em;padding:8px 28px;border-radius:18px;border:none;background:#ffe082;color:#bfae6a;font-weight:700;box-shadow:0 2px 8px #ffe08233;cursor:pointer;">公开日记</button>
+            <button id="tab-private" class="tab-btn" style="font-size:1.1em;padding:8px 28px;border-radius:18px;border:none;background:#fffbe6;color:#bfae6a;font-weight:700;box-shadow:0 2px 8px #ffe08222;cursor:pointer;">我的私密日记</button>
+            <span id="wallet-tip" style="display:none;color:#bfae6a;font-size:0.98em;margin-left:18px;align-self:center;">请先连接钱包查看私密日记</span>
+          </div>
+          <div class="diary-list" id="diaryList"></div>
+          <div class="empty-tip" id="emptyTip" style="display:none;">暂无日记，快去写一篇吧！</div>
         </div>
-      </div>
-      <div id="diary-status" class="status mt-2 text-sm"></div>
     </div>
-  </main>
-
-  <!-- 底部 -->
-  <footer class="bg-darker/90 border-t border-gray-800 mt-4 py-2">
-    <div class="container mx-auto px-4 text-center text-gray-500 text-xs">
-      <p>ChainDiary © 2025 | 基于区块链技术的去中心化日记平台</p>
-      <p class="mt-1">每篇日记都是一个不可篡改的区块，记录你的数字人生</p>
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">×</button>
+            <div class="diary-title-full" id="modalTitle"></div>
+            <div class="diary-content-full" id="modalContent"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
     </div>
-  </footer>
-
-  <!-- 区块详情模态框 -->
-  <div id="block-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden fade-in">
-    <div class="bg-darker border border-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-semibold" id="modal-title">区块详情</h3>
-        <button id="close-modal" class="text-gray-400 hover:text-white">
-          <i class="fas fa-times text-xl"></i>
-        </button>
-      </div>
-      <div class="space-y-4" id="modal-content">
-        <!-- 模态框内容将通过JS动态生成 -->
-      </div>
-      <div class="mt-6 flex justify-end">
-        <button id="copy-hash" class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition flex items-center">
-          <i class="fas fa-copy mr-2"></i> 复制哈希值
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Loading overlay -->
-  <div id="loading-overlay" style="display:none;position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);backdrop-filter:blur(1px);align-items:center;justify-content:center;">
-    <div style="background:rgba(255,255,255,0.85);padding:32px 48px;border-radius:18px;box-shadow:0 4px 32px #0002;display:flex;flex-direction:column;align-items:center;">
-      <i class="fas fa-spinner fa-spin fa-2x text-primary mb-2"></i>
-      <span id="loading-text" style="color:#6366f1;font-size:1.1rem;">加载中...</span>
-    </div>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script type="module">
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-    window._firebaseApp = initializeApp({
+    import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    const firebaseConfig = {
       apiKey: "AIzaSyA5Z5ieEbAcfQX0kxGSn9ldGXhzvAwx_8M",
       authDomain: "chat-294cc.firebaseapp.com",
       databaseURL: "https://chat-294cc-default-rtdb.firebaseio.com",
@@ -265,112 +306,163 @@
       messagingSenderId: "913615304269",
       appId: "1:913615304269:web:0274ffaccb8e6b678e4e04",
       measurementId: "G-SJR9NDW86B"
-    });
-    window._firebaseDb = getDatabase(window._firebaseApp);
-    window._firebasePushDiary = async function(entry) {
-      const db = window._firebaseDb;
-      await push(ref(db, 'diaryEntries'), entry);
     };
-  </script>
-
-  <script>
-    // Solana wallet connect & on-chain diary logic
-    const { Connection, Transaction, clusterApiUrl, PublicKey } = window.solanaWeb3 || {};
-    let wallet = null;
-    let walletAddress = '';
-    const walletBtn = document.getElementById('connect-wallet-btn');
-    const walletAddrSpan = document.getElementById('wallet-address');
-    const statusDiv = document.getElementById('diary-status');
-
-    // Loading overlay helpers
-    function showLoading(text) {
-      const overlay = document.getElementById('loading-overlay');
-      const loadingText = document.getElementById('loading-text');
-      if (loadingText && text) loadingText.textContent = text;
-      overlay.style.display = 'flex';
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    // 钱包连接（仅用于私密日记过滤）
+    let currentWallet = '';
+    // 全局钱包连接按钮
+    const globalWalletBtn = document.getElementById('global-wallet-btn');
+    function shortAddr(addr) {
+      if (!addr || addr.length < 8) return addr;
+      return addr.slice(0, 4) + '...' + addr.slice(-6);
     }
-    function hideLoading() {
-      const overlay = document.getElementById('loading-overlay');
-      overlay.style.display = 'none';
-    }
-
-    async function connectWallet() {
-      showLoading('正在连接钱包...');
+    async function connectWalletGlobal() {
       if (window.solana && window.solana.isPhantom) {
         try {
           const resp = await window.solana.connect();
-          wallet = resp.publicKey;
-          walletAddress = wallet.toBase58();
-          walletBtn.textContent = '✅ 已连接钱包';
-          walletBtn.disabled = true;
-          walletAddrSpan.textContent = walletAddress;
-        } catch (err) {
-          statusDiv.textContent = '连接失败: ' + err.message;
-        }
+          currentWallet = resp.publicKey.toString();
+          globalWalletBtn.textContent = shortAddr(currentWallet);
+          document.getElementById('wallet-tip').style.display = 'none';
+          renderCurrentTab();
+        } catch (e) {}
       } else {
         alert('请安装 Phantom 钱包');
       }
-      hideLoading();
     }
-    if (walletBtn) walletBtn.onclick = connectWallet;
-
-    async function sendMemoToSolana(title, content, isPublic) {
-      if (!wallet) {
-        alert('请先连接钱包');
-        return;
+    globalWalletBtn.onclick = connectWalletGlobal;
+    // 页面加载时自动检测钱包
+    window.addEventListener('load', async () => {
+      if (window.solana && window.solana.isPhantom && window.solana.isConnected) {
+        try {
+          const resp = await window.solana.connect({ onlyIfTrusted: true });
+          currentWallet = resp.publicKey.toString();
+          globalWalletBtn.textContent = shortAddr(currentWallet);
+          renderCurrentTab();
+        } catch (e) {}
       }
-      if (!content) {
-        alert('日记内容不能为空！');
-        return;
-      }
-      showLoading('正在上链，请稍候...');
-      try {
-        const connection = new Connection('https://small-holy-forest.solana-mainnet.quiknode.pro/b59315ea187b3de1b3542c5c25d7f2d5b5410ff4/', 'confirmed');
-        const memoProgramId = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
-        const message = title ? `[${title}] ${content}` : content;
-        const encodedMessage = new TextEncoder().encode(message);
-        if (encodedMessage.length > 566) {
-          alert('日记内容太长，无法上链（最大支持566字节，当前' + encodedMessage.length + '字节）');
-          hideLoading();
+    });
+    document.getElementById('tab-private').onclick = function() {
+      setTab('private');
+    };
+    document.getElementById('tab-public').onclick = function() {
+      setTab('public');
+    };
+    function setTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-public').classList.remove('active');
+      document.getElementById('tab-private').classList.remove('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+      renderCurrentTab();
+    }
+    let allDiaries = [];
+    let currentTab = 'public';
+    function renderCurrentTab() {
+      if (currentTab === 'private') {
+        const emptyTip = document.getElementById('emptyTip');
+        if (!currentWallet) {
+          document.getElementById('wallet-tip').style.display = '';
+          renderDiaries([]);
+          emptyTip.textContent = '请先连接钱包后查看你的私密日记';
+          emptyTip.style.display = '';
           return;
         }
-        const memoInstruction = {
-          keys: [{ pubkey: wallet, isSigner: true, isWritable: false }],
-          programId: memoProgramId,
-          data: encodedMessage
-        };
-        const transaction = new Transaction().add(memoInstruction);
-        transaction.feePayer = wallet;
-        const { blockhash } = await connection.getLatestBlockhash();
-        transaction.recentBlockhash = blockhash;
-        const signed = await window.solana.signTransaction(transaction);
-        const signature = await connection.sendRawTransaction(signed.serialize());
-        await connection.confirmTransaction(signature);
-        const shortSig = signature.slice(0, 4) + '...' + signature.slice(-6);
-        statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta" target="_blank" class="underline text-primary">${shortSig}</a>`;
-        // 上传到Firebase
-        if(window._firebasePushDiary) {
-          window._firebasePushDiary({
-            title,
-            content,
-            wallet: walletAddress,
-            txid: signature,
-            timestamp: Date.now(),
-            public: isPublic
-          });
-        }
-      } catch (e) {
-        statusDiv.textContent = '❌ 写入失败: ' + (e.message || e);
+        document.getElementById('wallet-tip').style.display = 'none';
+        emptyTip.textContent = '暂无日记，快去写一篇吧！';
+        const privateDiaries = allDiaries.filter(d => d.public === false && d.wallet === currentWallet);
+        renderDiaries(privateDiaries);
+      } else {
+        document.getElementById('wallet-tip').style.display = 'none';
+        const emptyTip = document.getElementById('emptyTip');
+        emptyTip.textContent = '暂无日记，快去写一篇吧！';
+        const publicDiaries = allDiaries.filter(d => d.public !== false);
+        renderDiaries(publicDiaries);
       }
-      hideLoading();
     }
-    // 挂载到"上链保存"按钮
-    document.getElementById('add-diary').addEventListener('click', async () => {
-      const title = document.getElementById('diary-title').value.trim();
-      const content = document.getElementById('diary-content').value.trim();
-      const isPublic = document.getElementById('diary-public').checked;
-      await sendMemoToSolana(title, content, isPublic);
+    // 获取最新的30条日记
+    function fetchDiaries(callback) {
+      const diaryRef = query(ref(db, 'diaryEntries'), limitToLast(30));
+      onValue(diaryRef, (snapshot) => {
+        const val = snapshot.val();
+        if (!val) return callback([]);
+        // 转为数组并按时间倒序
+        const arr = Object.entries(val).map(([id, entry]) => ({ id, ...entry })).sort((a, b) => b.timestamp - a.timestamp);
+        callback(arr);
+      });
+    }
+    // 渲染日记卡片
+    function renderDiaries(diaries) {
+      const diaryList = document.getElementById('diaryList');
+      const emptyTip = document.getElementById('emptyTip');
+      diaryList.innerHTML = '';
+      if (!diaries.length) {
+        emptyTip.style.display = '';
+        return;
+      }
+      emptyTip.style.display = 'none';
+      diaries.forEach((d) => {
+        const card = document.createElement('div');
+        card.className = 'diary-card';
+        card.title = '点击查看全文';
+        // 标题
+        let title = d.title ? d.title : '无标题';
+        // 只显示前120字
+        let preview = d.content ? (d.content.length > 120 ? d.content.slice(0, 120) + '...' : d.content) : '';
+        card.innerHTML = `
+          <div class="diary-title-preview">${escapeHtml(title)}</div>
+          <div class="diary-content-preview">${escapeHtml(preview)}</div>
+          <div class="diary-meta">
+            <span class="author">${d.wallet ? (d.wallet.slice(0,4)+'...'+d.wallet.slice(-6)) : '匿名'}</span>
+            <span class="date">${formatDate(d.timestamp)}</span>
+          </div>
+        `;
+        card.addEventListener('click', () => showModal(d));
+        diaryList.appendChild(card);
+      });
+    }
+    // 弹窗显示全文
+    function showModal(diary) {
+      let txHtml = diary.txid ? `<a href=\"https://solscan.io/tx/${diary.txid}\" target=\"_blank\">Solscan</a>` : '';
+      document.getElementById('modalTitle').innerHTML = escapeHtml(diary.title||'无标题');
+      document.getElementById('modalContent').innerHTML = escapeHtml(diary.content||'');
+      document.getElementById('modalFooter').innerHTML = `
+        <span class="author">${diary.wallet ? (diary.wallet.slice(0,4)+'...'+diary.wallet.slice(-6)) : '匿名'}</span>
+        <span class="date">${formatDate(diary.timestamp)}</span>
+        ${txHtml}
+      `;
+      document.getElementById('modal').classList.add('active');
+    }
+    document.getElementById('modalClose').onclick = () => {
+      document.getElementById('modal').classList.remove('active');
+    };
+    document.getElementById('modal').onclick = (e) => {
+      if (e.target === document.getElementById('modal')) {
+        document.getElementById('modal').classList.remove('active');
+      }
+    };
+    // 工具函数
+    function formatDate(ts) {
+      if (!ts) return '';
+      const date = new Date(ts);
+      return date.toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    }
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(tag) {
+        const chars = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'};
+        return chars[tag] || tag;
+      });
+    }
+    // 页面加载时拉取日记
+    fetchDiaries(function(diaries){
+      allDiaries = diaries;
+      renderCurrentTab();
     });
-  </script>
+    setTab('public');
+    // 创建日记按钮
+    document.getElementById('create-diary-btn').onclick = function() {
+      window.open('未命名.html', '_blank');
+    };
+    </script>
 </body>
-</html>
+</html> 
