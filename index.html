@@ -342,16 +342,22 @@
     let currentTab = 'public';
     function renderCurrentTab() {
       if (currentTab === 'private') {
+        const emptyTip = document.getElementById('emptyTip');
         if (!currentWallet) {
           document.getElementById('wallet-tip').style.display = '';
           renderDiaries([]);
+          emptyTip.textContent = '请先连接钱包后查看你的私密日记';
+          emptyTip.style.display = '';
           return;
         }
         document.getElementById('wallet-tip').style.display = 'none';
+        emptyTip.textContent = '暂无日记，快去写一篇吧！';
         const privateDiaries = allDiaries.filter(d => d.public === false && d.wallet === currentWallet);
         renderDiaries(privateDiaries);
       } else {
         document.getElementById('wallet-tip').style.display = 'none';
+        const emptyTip = document.getElementById('emptyTip');
+        emptyTip.textContent = '暂无日记，快去写一篇吧！';
         const publicDiaries = allDiaries.filter(d => d.public !== false);
         renderDiaries(publicDiaries);
       }
