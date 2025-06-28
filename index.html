@@ -327,11 +327,6 @@
       }
     });
     document.getElementById('tab-private').onclick = function() {
-      if (!currentWallet) {
-        document.getElementById('wallet-tip').style.display = '';
-        connectWalletGlobal();
-        return;
-      }
       setTab('private');
     };
     document.getElementById('tab-public').onclick = function() {
@@ -352,6 +347,7 @@
           renderDiaries([]);
           return;
         }
+        document.getElementById('wallet-tip').style.display = 'none';
         const privateDiaries = allDiaries.filter(d => d.public === false && d.wallet === currentWallet);
         renderDiaries(privateDiaries);
       } else {
