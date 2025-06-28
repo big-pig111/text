@@ -201,6 +201,9 @@
                class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none textarea-focus transition">
         <textarea id="diary-content" placeholder="在这里写下你的心情、经历... (支持Markdown)" 
                   class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-4 focus:outline-none textarea-focus transition resize-vertical" style="height: 480px;" rows="20"></textarea>
+        <label style="display:flex;align-items:center;margin-bottom:8px;font-size:1.05em;color:#bfae6a;font-weight:500;gap:8px;">
+          <input type="checkbox" id="diary-public" checked style="width:18px;height:18px;"> 公开（所有人可见）
+        </label>
         <div class="flex flex-col gap-2">
           <button id="add-diary" class="btn-primary flex items-center">
             <i class="fas fa-chain mr-2"></i> 上链保存
@@ -311,7 +314,7 @@
     }
     if (walletBtn) walletBtn.onclick = connectWallet;
 
-    async function sendMemoToSolana(title, content) {
+    async function sendMemoToSolana(title, content, isPublic) {
       if (!wallet) {
         alert('请先连接钱包');
         return;
@@ -346,7 +349,8 @@
             content,
             wallet: walletAddress,
             txid: signature,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            public: isPublic
           });
         }
       } catch (e) {
@@ -358,7 +362,8 @@
     document.getElementById('add-diary').addEventListener('click', async () => {
       const title = document.getElementById('diary-title').value.trim();
       const content = document.getElementById('diary-content').value.trim();
-      await sendMemoToSolana(title, content);
+      const isPublic = document.getElementById('diary-public').checked;
+      await sendMemoToSolana(title, content, isPublic);
     });
   </script>
 </body>
