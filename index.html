@@ -294,6 +294,19 @@
             <div class="modal-footer" id="modalFooter"></div>
         </div>
     </div>
+    <div class="modal" id="createDiaryModal">
+        <div class="modal-content" style="max-width:600px;max-height:90vh;overflow-y:auto;">
+            <button class="modal-close" id="createDiaryClose">×</button>
+            <div style="margin-bottom:18px;font-size:1.3em;font-weight:700;color:#bfae6a;text-align:center;">创建新日记</div>
+            <input type="text" id="new-diary-title" placeholder="添加日记标题 (可选)" style="width:100%;margin-bottom:10px;padding:12px 18px;border-radius:12px;border:2px solid #e6c155;background:#fffbe6;font-size:1em;">
+            <textarea id="new-diary-content" placeholder="在这里写下你的心情、经历... (支持Markdown)" style="width:100%;min-height:180px;max-height:320px;padding:12px 18px;border-radius:12px;border:2px solid #e6c155;background:#fffbe6;font-size:1em;margin-bottom:10px;resize:vertical;"></textarea>
+            <label style="display:flex;align-items:center;margin-bottom:8px;font-size:1.05em;color:#bfae6a;font-weight:500;gap:8px;">
+              <input type="checkbox" id="new-diary-public" checked style="width:18px;height:18px;"> 公开（所有人可见）
+            </label>
+            <button id="save-diary-btn" class="top-btn create" style="width:100%;margin-top:8px;">上链保存</button>
+            <div id="create-diary-status" style="margin-top:10px;color:#bfae6a;font-size:0.98em;"></div>
+        </div>
+    </div>
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
@@ -461,8 +474,92 @@
     setTab('public');
     // 创建日记按钮
     document.getElementById('create-diary-btn').onclick = function() {
-      window.open('未命名.html', '_blank');
+      document.getElementById('createDiaryModal').classList.add('active');
     };
+    document.getElementById('createDiaryClose').onclick = function() {
+      document.getElementById('createDiaryModal').classList.remove('active');
+      document.getElementById('new-diary-title').value = '';
+      document.getElementById('new-diary-content').value = '';
+      document.getElementById('new-diary-public').checked = true;
+      document.getElementById('create-diary-status').textContent = '';
+    };
+    document.getElementById('createDiaryModal').onclick = function(e) {
+      if (e.target === document.getElementById('createDiaryModal')) {
+        document.getElementById('createDiaryModal').classList.remove('active');
+        document.getElementById('new-diary-title').value = '';
+        document.getElementById('new-diary-content').value = '';
+        document.getElementById('new-diary-public').checked = true;
+        document.getElementById('create-diary-status').textContent = '';
+      }
+    };
+    async function saveNewDiary() {
+      const title = document.getElementById('new-diary-title').value.trim();
+      const content = document.getElementById('new-diary-content').value.trim();
+      const isPublic = document.getElementById('new-diary-public').checked;
+      const statusDiv = document.getElementById('create-diary-status');
+      if (!currentWallet) {
+        statusDiv.textContent = '请先连接钱包';
+        return;
+      }
+      if (!content) {
+        statusDiv.textContent = '日记内容不能为空！';
+        return;
+      }
+      const message = title ? `[${title}] ${content}` : content;
+      const encodedMessage = new TextEncoder().encode(message);
+      if (encodedMessage.length > 566) {
+        statusDiv.textContent = '日记内容太长，无法上链（最大支持566字节，当前' + encodedMessage.length + '字节）';
+        return;
+      }
+      statusDiv.textContent = '正在上链，请稍候...';
+      try {
+        const { Connection, Transaction, PublicKey } = window.solanaWeb3;
+        const connection = new Connection('https://small-holy-forest.solana-mainnet.quiknode.pro/b59315ea187b3de1b3542c5c25d7f2d5b5410ff4/', 'confirmed');
+        const memoProgramId = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
+        const walletPubKey = new PublicKey(currentWallet);
+        const memoInstruction = {
+          keys: [{ pubkey: walletPubKey, isSigner: true, isWritable: false }],
+          programId: memoProgramId,
+          data: encodedMessage
+        };
+        const transaction = new Transaction().add(memoInstruction);
+        transaction.feePayer = walletPubKey;
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        const signed = await window.solana.signTransaction(transaction);
+        const signature = await connection.sendRawTransaction(signed.serialize());
+        await connection.confirmTransaction(signature);
+        // 上传到Firebase
+        if (window.solana && window.solana.isPhantom) {
+          const db = getDatabase();
+          const { push, ref } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js');
+          await push(ref(db, 'diaryEntries'), {
+            title,
+            content,
+            wallet: currentWallet,
+            txid: signature,
+            timestamp: Date.now(),
+            public: isPublic
+          });
+        }
+        statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta" target="_blank" style="color:#bfae6a;text-decoration:underline;">${signature.slice(0,4)}...${signature.slice(-6)}</a>`;
+        // 关闭弹窗并刷新日记列表
+        setTimeout(() => {
+          document.getElementById('createDiaryModal').classList.remove('active');
+          document.getElementById('new-diary-title').value = '';
+          document.getElementById('new-diary-content').value = '';
+          document.getElementById('new-diary-public').checked = true;
+          document.getElementById('create-diary-status').textContent = '';
+          fetchDiaries(function(diaries){
+            allDiaries = diaries;
+            renderCurrentTab();
+          });
+        }, 1200);
+      } catch (e) {
+        statusDiv.textContent = '❌ 写入失败: ' + (e.message || e);
+      }
+    }
+    document.getElementById('save-diary-btn').onclick = saveNewDiary;
     </script>
 </body>
 </html> 
