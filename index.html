@@ -219,11 +219,12 @@
             .modal-footer { padding: 12px 10px 10px 10px; font-size: 0.98em; }
         }
         .top-btn {
-            font-weight: 700;
+            font-weight: 900;
+            font-size: 1.18em;
+            text-shadow: 0 2px 8px #fffbe6, 0 1px 0 #fff;
             border: none;
             border-radius: 16px;
             padding: 10px 28px;
-            font-size: 1.08em;
             min-width: 120px;
             box-shadow: 0 4px 18px #e6c15533, 0 1.5px 6px #ffe08233;
             cursor: pointer;
@@ -233,23 +234,25 @@
         }
         .top-btn.create {
             background: linear-gradient(90deg, #fffde7 0%, #ffe082 100%);
-            color: #bfae6a;
+            color: #7c6a2c;
+            font-weight: 900;
+            text-shadow: none;
         }
         .top-btn.create:hover {
             background: linear-gradient(90deg, #ffe082 0%, #fffde7 100%);
-            color: #e6c155;
-            box-shadow: 0 8px 32px #ffe08255;
-            transform: translateY(-2px) scale(1.04);
+            color: #fff;
+            text-shadow: 0 2px 8px #bfae6a, 0 1px 0 #fff;
         }
         .top-btn.wallet {
-            background: linear-gradient(90deg, #e6c155 0%, #fffbe6 100%);
-            color: #fff;
+            background: linear-gradient(90deg, #ffe082 0%, #fffbe6 100%);
+            color: #7c6a2c;
+            font-weight: 900;
+            text-shadow: none;
         }
         .top-btn.wallet:hover {
-            background: linear-gradient(90deg, #fffbe6 0%, #e6c155 100%);
-            color: #bfae6a;
-            box-shadow: 0 8px 32px #e6c15555;
-            transform: translateY(-2px) scale(1.04);
+            background: linear-gradient(90deg, #e6c155 0%, #ffe082 100%);
+            color: #fff;
+            text-shadow: 0 2px 8px #bfae6a, 0 1px 0 #fff;
         }
         .tab-btn {
             background: #fffbe6 !important;
@@ -267,12 +270,25 @@
             border: 2.5px solid #e6c155 !important;
             transform: scale(1.04);
         }
+        @media (max-width: 600px) {
+            #editor-modal-inner {
+                max-width: 98vw !important;
+                width: 98vw !important;
+            }
+            #editor-iframe {
+                width: 98vw !important;
+                min-width: 0 !important;
+                height: 90vh !important;
+                min-height: 300px !important;
+                max-height: 90vh !important;
+            }
+        }
     </style>
 </head>
 <body>
-    <div style="position:fixed;top:24px;right:36px;z-index:100;display:flex;gap:18px;">
-      <button id="create-diary-btn" class="top-btn create">创建日记</button>
+    <div style="position:fixed;top:24px;right:36px;z-index:100;display:flex;flex-direction:column;gap:14px;align-items:flex-end;">
       <button id="global-wallet-btn" class="top-btn wallet">连接钱包</button>
+      <button id="create-diary-btn" class="top-btn create">创建日记</button>
     </div>
     <div class="container">
         <h1>链上日记列表</h1>
@@ -296,9 +312,9 @@
     </div>
     <!-- 日记编辑器弹窗 -->
     <div id="editor-modal" style="display:none;position:fixed;z-index:2000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
-      <div style="background:#fffbe6;padding:0;border-radius:18px;box-shadow:0 8px 32px #e6c15555;max-width:900px;width:96vw;max-height:96vh;display:flex;flex-direction:column;position:relative;">
+      <div id="editor-modal-inner" style="background:#fffbe6;padding:0;border-radius:18px;box-shadow:0 8px 32px #e6c15555;max-width:1200px;width:96vw;max-height:96vh;display:flex;flex-direction:column;position:relative;">
         <button id="close-editor-modal" style="position:absolute;top:12px;right:18px;font-size:1.8em;color:#bfae6a;background:none;border:none;cursor:pointer;z-index:10;">×</button>
-        <iframe id="editor-iframe" src="" style="width:800px;max-width:96vw;height:600px;max-height:80vh;border:none;border-radius:18px;"></iframe>
+        <iframe id="editor-iframe" src="" style="width:90vw;min-width:320px;max-width:1200px;height:85vh;min-height:400px;max-height:85vh;border:none;border-radius:18px;background:#fff;"></iframe>
       </div>
     </div>
     <script type="module">
