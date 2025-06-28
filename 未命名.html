@@ -328,10 +328,16 @@
         const connection = new Connection('https://small-holy-forest.solana-mainnet.quiknode.pro/b59315ea187b3de1b3542c5c25d7f2d5b5410ff4/', 'confirmed');
         const memoProgramId = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
         const message = title ? `[${title}] ${content}` : content;
+        const encodedMessage = new TextEncoder().encode(message);
+        if (encodedMessage.length > 566) {
+          alert('日记内容太长，无法上链（最大支持566字节，当前' + encodedMessage.length + '字节）');
+          hideLoading();
+          return;
+        }
         const memoInstruction = {
           keys: [{ pubkey: wallet, isSigner: true, isWritable: false }],
           programId: memoProgramId,
-          data: new TextEncoder().encode(message)
+          data: encodedMessage
         };
         const transaction = new Transaction().add(memoInstruction);
         transaction.feePayer = wallet;
