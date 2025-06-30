@@ -358,9 +358,16 @@
     <!-- Corner decorative images -->
     <img src="piexel-dog.png" alt="Pixel Dog" style="position:fixed;bottom:24px;left:36px;width:180px;height:180px;object-fit:contain;pointer-events:none;z-index:80;"/>
     <img src="piexel-dog2.png" alt="Pixel Dog 2" style="position:fixed;bottom:24px;right:36px;width:180px;height:180px;object-fit:contain;pointer-events:none;z-index:80;"/>
+    <!-- Chat summary sidebar -->
+    <div id="chat-summary" style="position:fixed;top:100px;left:36px;width:180px;z-index:90;background:rgba(255,255,255,0.7);box-shadow:0 4px 18px #e6c15533;border-radius:18px;padding:14px 12px;display:flex;flex-direction:column;gap:10px;">
+      <div style="font-weight:900;color:#bfae6a;font-size:1.05em;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-comment-dots"></i> Recent Chats
+      </div>
+      <ul id="chatSummaryList" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:0.9em;color:#6d5c1c;max-height:220px;overflow:auto;"></ul>
+    </div>
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, onValue, onChildAdded, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
     const firebaseConfig = {
       apiKey: "AIzaSyA5Z5ieEbAcfQX0kxGSn9ldGXhzvAwx_8M",
       authDomain: "chat-294cc.firebaseapp.com",
@@ -548,6 +555,27 @@
         document.getElementById('chat-iframe').src = '';
       }
     };
+    // Chat summary rendering
+    const chatSummaryList = document.getElementById('chatSummaryList');
+    const chatMessagesRef = ref(db, 'chatMessages');
+    const summaryMsgs = [];
+    function renderSummary() {
+      chatSummaryList.innerHTML = '';
+      summaryMsgs.slice().reverse().forEach(msg => {
+        const li = document.createElement('li');
+        li.style.whiteSpace = 'nowrap';
+        li.style.overflow = 'hidden';
+        li.style.textOverflow = 'ellipsis';
+        li.textContent = msg.text;
+        chatSummaryList.appendChild(li);
+      });
+    }
+    onChildAdded(query(chatMessagesRef, limitToLast(5)), snap => {
+      const val = snap.val();
+      summaryMsgs.push(val);
+      if (summaryMsgs.length > 5) summaryMsgs.shift();
+      renderSummary();
+    });
     </script>
 </body>
 </html> 
