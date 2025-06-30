@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>链上日记列表 - Blockchain Diary</title>
+    <title>Blockchain Diary List</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -285,23 +285,46 @@
                 max-height: 90vh !important;
             }
         }
+        .main-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: var(--gold-shadow);
+            border: 2px solid var(--gold-border);
+            padding: 40px 18px 32px 18px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 600px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .btn-primary, .btn-wallet {
+            width: auto;
+            min-width: 220px;
+            max-width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
     <div style="position:fixed;top:24px;right:36px;z-index:100;display:flex;flex-direction:column;gap:14px;align-items:flex-end;">
-      <button id="global-wallet-btn" class="top-btn wallet">连接钱包</button>
-      <button id="create-diary-btn" class="top-btn create">创建日记</button>
+      <button id="global-wallet-btn" class="top-btn wallet">Connect Wallet</button>
+      <button id="create-diary-btn" class="top-btn create">Create Diary</button>
     </div>
     <div class="container">
-        <h1>链上日记列表</h1>
+        <h1>Blockchain Diary List</h1>
         <div class="diary-list-wrap">
           <div class="tab-bar" id="tabBar" style="display:flex;gap:18px;justify-content:center;margin-bottom:0;">
-            <button id="tab-public" class="tab-btn active" style="font-size:1.1em;padding:8px 28px;border-radius:18px;border:none;background:#ffe082;color:#bfae6a;font-weight:700;box-shadow:0 2px 8px #ffe08233;cursor:pointer;">公开日记</button>
-            <button id="tab-private" class="tab-btn" style="font-size:1.1em;padding:8px 28px;border-radius:18px;border:none;background:#fffbe6;color:#bfae6a;font-weight:700;box-shadow:0 2px 8px #ffe08222;cursor:pointer;">我的私密日记</button>
-            <span id="wallet-tip" style="display:none;color:#bfae6a;font-size:0.98em;margin-left:18px;align-self:center;">请先连接钱包查看私密日记</span>
+            <button id="tab-public" class="tab-btn active" style="font-size:1.1em;padding:8px 28px;border-radius:18px;border:none;background:#ffe082;color:#bfae6a;font-weight:700;box-shadow:0 2px 8px #ffe08233;cursor:pointer;">Public Diaries</button>
+            <button id="tab-private" class="tab-btn" style="font-size:1.1em;padding:8px 28px;border-radius:18px;border:none;background:#fffbe6;color:#bfae6a;font-weight:700;box-shadow:0 2px 8px #ffe08222;cursor:pointer;">My Private Diaries</button>
+            <span id="wallet-tip" style="display:none;color:#bfae6a;font-size:0.98em;margin-left:18px;align-self:center;">Please connect your wallet to view private diaries</span>
           </div>
           <div class="diary-list" id="diaryList"></div>
-          <div class="empty-tip" id="emptyTip" style="display:none;">暂无日记，快去写一篇吧！</div>
+          <div class="empty-tip" id="emptyTip" style="display:none;">No diaries yet, write one now!</div>
         </div>
     </div>
     <div class="modal" id="modal">
@@ -314,9 +337,9 @@
     </div>
     <!-- 日记编辑器弹窗 -->
     <div id="editor-modal" style="display:none;position:fixed;z-index:2000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
-      <div id="editor-modal-inner" style="background:#fffbe6;padding:0;border-radius:18px;box-shadow:0 8px 32px #e6c15555;max-width:1200px;width:96vw;max-height:96vh;display:flex;flex-direction:column;position:relative;">
+      <div id="editor-modal-inner" style="background:#fffbe6;padding:0;border-radius:18px;box-shadow:0 8px 32px #e6c15555;max-width:1400px;width:98vw;max-height:98vh;display:flex;flex-direction:column;position:relative;">
         <button id="close-editor-modal" style="position:absolute;top:12px;right:18px;font-size:1.8em;color:#bfae6a;background:none;border:none;cursor:pointer;z-index:10;">×</button>
-        <iframe id="editor-iframe" src="" style="width:90vw;min-width:320px;max-width:1200px;height:85vh;min-height:400px;max-height:85vh;border:none;border-radius:18px;background:#fff;"></iframe>
+        <iframe id="editor-iframe" src="" style="width:96vw;min-width:320px;max-width:1400px;height:90vh;min-height:400px;max-height:90vh;border:none;border-radius:18px;background:#fff;"></iframe>
       </div>
     </div>
     <script type="module">
@@ -352,7 +375,7 @@
           renderCurrentTab();
         } catch (e) {}
       } else {
-        alert('请安装 Phantom 钱包');
+        alert('Please install Phantom wallet');
       }
     }
     globalWalletBtn.onclick = connectWalletGlobal;
@@ -388,18 +411,18 @@
         if (!currentWallet) {
           document.getElementById('wallet-tip').style.display = '';
           renderDiaries([]);
-          emptyTip.textContent = '请先连接钱包后查看你的私密日记';
+          emptyTip.textContent = 'Please connect your wallet to view your private diaries';
           emptyTip.style.display = '';
           return;
         }
         document.getElementById('wallet-tip').style.display = 'none';
-        emptyTip.textContent = '暂无日记，快去写一篇吧！';
+        emptyTip.textContent = 'No diaries yet, write one now!';
         const privateDiaries = allDiaries.filter(d => d.public === false && d.wallet === currentWallet);
         renderDiaries(privateDiaries);
       } else {
         document.getElementById('wallet-tip').style.display = 'none';
         const emptyTip = document.getElementById('emptyTip');
-        emptyTip.textContent = '暂无日记，快去写一篇吧！';
+        emptyTip.textContent = 'No diaries yet, write one now!';
         const publicDiaries = allDiaries.filter(d => d.public !== false);
         renderDiaries(publicDiaries);
       }
@@ -428,16 +451,16 @@
       diaries.forEach((d) => {
         const card = document.createElement('div');
         card.className = 'diary-card';
-        card.title = '点击查看全文';
+        card.title = 'Click to view full text';
         // 标题
-        let title = d.title ? d.title : '无标题';
+        let title = d.title ? d.title : 'Untitled';
         // 只显示前120字
         let preview = d.content ? (d.content.length > 120 ? d.content.slice(0, 120) + '...' : d.content) : '';
         card.innerHTML = `
           <div class="diary-title-preview">${escapeHtml(title)}</div>
           <div class="diary-content-preview">${escapeHtml(preview)}</div>
           <div class="diary-meta">
-            <span class="author">${d.wallet ? (d.wallet.slice(0,4)+'...'+d.wallet.slice(-6)) : '匿名'}</span>
+            <span class="author">${d.wallet ? (d.wallet.slice(0,4)+'...'+d.wallet.slice(-6)) : 'Anonymous'}</span>
             <span class="date">${formatDate(d.timestamp)}</span>
           </div>
         `;
@@ -448,10 +471,10 @@
     // 弹窗显示全文
     function showModal(diary) {
       let txHtml = diary.txid ? `<a href=\"https://solscan.io/tx/${diary.txid}\" target=\"_blank\">Solscan</a>` : '';
-      document.getElementById('modalTitle').innerHTML = escapeHtml(diary.title||'无标题');
+      document.getElementById('modalTitle').innerHTML = escapeHtml(diary.title||'Untitled');
       document.getElementById('modalContent').innerHTML = escapeHtml(diary.content||'');
       document.getElementById('modalFooter').innerHTML = `
-        <span class="author">${diary.wallet ? (diary.wallet.slice(0,4)+'...'+diary.wallet.slice(-6)) : '匿名'}</span>
+        <span class="author">${diary.wallet ? (diary.wallet.slice(0,4)+'...'+diary.wallet.slice(-6)) : 'Anonymous'}</span>
         <span class="date">${formatDate(diary.timestamp)}</span>
         ${txHtml}
       `;
@@ -487,7 +510,7 @@
     // 创建日记按钮
     document.getElementById('create-diary-btn').onclick = function() {
       document.getElementById('editor-modal').style.display = 'flex';
-      document.getElementById('editor-iframe').src = '未命名.html';
+      document.getElementById('editor-iframe').src = 'Untitled.html';
     };
     document.getElementById('close-editor-modal').onclick = function() {
       document.getElementById('editor-modal').style.display = 'none';
