@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChainDiary - 区块链日记</title>
+  <title>ChainDiary - Blockchain Diary</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
@@ -41,14 +41,18 @@
       border-radius: 20px;
       box-shadow: var(--gold-shadow);
       border: 2px solid var(--gold-border);
-      padding: 40px 18px 32px 18px;
-      max-width: 800px;
+      padding: 0;
+      max-width: 1200px;
       margin: 0 auto;
       min-height: 600px;
       height: 80vh;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+    }
+    .space-y-4 {
+      padding: 32px 32px 24px 32px;
+      overflow: hidden;
     }
     .main-card h2 {
       color: #bfae6a;
@@ -85,11 +89,20 @@
       height: 320px;
       resize: vertical;
     }
+    .btn-primary, .btn-wallet {
+      width: 100%;
+      min-width: 220px;
+      max-width: 1136px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
     .btn-primary {
       background: linear-gradient(90deg, #ffe082 0%, #fffbe6 100%);
       color: #7c6a2c;
       border: none;
-      border-radius: 12px;
       padding: 12px 0;
       font-size: 1rem;
       font-family: var(--gold-font);
@@ -99,13 +112,6 @@
       box-shadow: 0 2px 8px #e6d8a344;
       transition: background 0.2s, color 0.2s, box-shadow 0.2s;
       letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      justify-content: center;
-      min-width: 220px;
-      max-width: 100%;
     }
     .btn-primary:hover {
       background: linear-gradient(90deg, #fffbe6 0%, #ffe082 100%);
@@ -116,7 +122,6 @@
       background: linear-gradient(90deg, #ffe082 0%, #fffbe6 100%);
       color: #7c6a2c;
       border: none;
-      border-radius: 12px;
       padding: 12px 0;
       font-size: 1rem;
       font-family: var(--gold-font);
@@ -126,13 +131,6 @@
       box-shadow: 0 2px 8px #e6d8a344;
       transition: background 0.2s, color 0.2s, box-shadow 0.2s;
       letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      justify-content: center;
-      min-width: 220px;
-      max-width: 100%;
     }
     #wallet-section {
       margin: 12px 0 0 0;
@@ -196,21 +194,21 @@
   <main>
     <div class="main-card">
       <h2 class="text-xl font-semibold mb-4 flex items-center">
-        <i class="fas fa-feather-alt text-primary mr-2"></i> 记录你的区块链日记
+        <i class="fas fa-feather-alt text-primary mr-2"></i> Record your blockchain diary
       </h2>
       <div class="space-y-4 flex-1 flex flex-col">
-        <input type="text" id="diary-title" placeholder="添加日记标题 (可选)" 
+        <input type="text" id="diary-title" placeholder="Add diary title (optional)" 
                class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none textarea-focus transition">
-        <textarea id="diary-content" placeholder="在这里写下你的心情、经历... (支持Markdown)" 
+        <textarea id="diary-content" placeholder="Write your mood, experience here... (Markdown supported)" 
                   class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-4 focus:outline-none textarea-focus transition resize-vertical" style="height: 320px;" rows="14"></textarea>
         <label style="display:flex;align-items:center;margin-bottom:8px;font-size:1.05em;color:#bfae6a;font-weight:500;gap:8px;">
-          <input type="checkbox" id="diary-public" checked style="width:18px;height:18px;"> 公开（所有人可见）
+          <input type="checkbox" id="diary-public" checked style="width:18px;height:18px;"> Public (visible to everyone)
         </label>
         <div class="flex flex-col gap-2">
           <button id="add-diary" class="btn-primary flex items-center">
-            <i class="fas fa-chain mr-2"></i> 上链保存
+            <i class="fas fa-chain mr-2"></i> Save On-chain
           </button>
-          <button id="connect-wallet-btn" class="btn-wallet flex items-center"><i class="fas fa-wallet mr-2"></i>连接 Phantom 钱包</button>
+          <button id="connect-wallet-btn" class="btn-wallet flex items-center"><i class="fas fa-wallet mr-2"></i>Connect Phantom Wallet</button>
           <span id="wallet-address" class="ml-4 text-primary"></span>
         </div>
       </div>
@@ -221,8 +219,8 @@
   <!-- 底部 -->
   <footer class="bg-darker/90 border-t border-gray-800 mt-4 py-2">
     <div class="container mx-auto px-4 text-center text-gray-500 text-xs">
-      <p>ChainDiary © 2025 | 基于区块链技术的去中心化日记平台</p>
-      <p class="mt-1">每篇日记都是一个不可篡改的区块，记录你的数字人生</p>
+      <p>ChainDiary © 2025 | Decentralized diary platform based on blockchain technology</p>
+      <p class="mt-1">Each diary is an immutable block, recording your digital life</p>
     </div>
   </footer>
 
@@ -230,7 +228,7 @@
   <div id="block-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden fade-in">
     <div class="bg-darker border border-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-semibold" id="modal-title">区块详情</h3>
+        <h3 class="text-xl font-semibold" id="modal-title">Block Details</h3>
         <button id="close-modal" class="text-gray-400 hover:text-white">
           <i class="fas fa-times text-xl"></i>
         </button>
@@ -240,7 +238,7 @@
       </div>
       <div class="mt-6 flex justify-end">
         <button id="copy-hash" class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition flex items-center">
-          <i class="fas fa-copy mr-2"></i> 复制哈希值
+          <i class="fas fa-copy mr-2"></i> Copy Hash
         </button>
       </div>
     </div>
@@ -250,7 +248,7 @@
   <div id="loading-overlay" style="display:none;position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);backdrop-filter:blur(1px);align-items:center;justify-content:center;">
     <div style="background:rgba(255,255,255,0.85);padding:32px 48px;border-radius:18px;box-shadow:0 4px 32px #0002;display:flex;flex-direction:column;align-items:center;">
       <i class="fas fa-spinner fa-spin fa-2x text-primary mb-2"></i>
-      <span id="loading-text" style="color:#6366f1;font-size:1.1rem;">加载中...</span>
+      <span id="loading-text" style="color:#6366f1;font-size:1.1rem;">Loading...</span>
     </div>
   </div>
 
@@ -297,20 +295,20 @@
     }
 
     async function connectWallet() {
-      showLoading('正在连接钱包...');
+      showLoading('Connecting wallet...');
       if (window.solana && window.solana.isPhantom) {
         try {
           const resp = await window.solana.connect();
           wallet = resp.publicKey;
           walletAddress = wallet.toBase58();
-          walletBtn.textContent = '✅ 已连接钱包';
+          walletBtn.textContent = '✅ Wallet Connected';
           walletBtn.disabled = true;
           walletAddrSpan.textContent = walletAddress;
         } catch (err) {
-          statusDiv.textContent = '连接失败: ' + err.message;
+          statusDiv.textContent = 'Connection failed: ' + err.message;
         }
       } else {
-        alert('请安装 Phantom 钱包');
+        alert('Please install Phantom Wallet');
       }
       hideLoading();
     }
@@ -318,21 +316,21 @@
 
     async function sendMemoToSolana(title, content, isPublic) {
       if (!wallet) {
-        alert('请先连接钱包');
+        alert('Please connect wallet first');
         return;
       }
       if (!content) {
-        alert('日记内容不能为空！');
+        alert('Diary content cannot be empty!');
         return;
       }
-      showLoading('正在上链，请稍候...');
+      showLoading('Saving on-chain, please wait...');
       try {
         const connection = new Connection('https://small-holy-forest.solana-mainnet.quiknode.pro/b59315ea187b3de1b3542c5c25d7f2d5b5410ff4/', 'confirmed');
         const memoProgramId = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
         const message = title ? `[${title}] ${content}` : content;
         const encodedMessage = new TextEncoder().encode(message);
         if (encodedMessage.length > 566) {
-          alert('日记内容太长，无法上链（最大支持566字节，当前' + encodedMessage.length + '字节）');
+          alert('Diary content is too long, cannot save on-chain (max 566 bytes, current ' + encodedMessage.length + ' bytes)');
           hideLoading();
           return;
         }
@@ -349,7 +347,7 @@
         const signature = await connection.sendRawTransaction(signed.serialize());
         await connection.confirmTransaction(signature);
         const shortSig = signature.slice(0, 4) + '...' + signature.slice(-6);
-        statusDiv.innerHTML = `✅ 日记已上链，交易 ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta" target="_blank" class="underline text-primary">${shortSig}</a>`;
+        statusDiv.innerHTML = `✅ Diary saved on-chain, Transaction ID: <a href="https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta" target="_blank" class="underline text-primary">${shortSig}</a>`;
         // 上传到Firebase
         if(window._firebasePushDiary) {
           window._firebasePushDiary({
@@ -362,7 +360,7 @@
           });
         }
       } catch (e) {
-        statusDiv.textContent = '❌ 写入失败: ' + (e.message || e);
+        statusDiv.textContent = '❌ Write failed: ' + (e.message || e);
       }
       hideLoading();
     }
