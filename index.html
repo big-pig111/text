@@ -227,7 +227,7 @@
             border: none;
             border-radius: 16px;
             padding: 10px 28px;
-            min-width: 120px;
+            width: 160px;
             box-shadow: 0 4px 18px #e6c15533, 0 1.5px 6px #ffe08233;
             cursor: pointer;
             transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
@@ -312,8 +312,11 @@
 </head>
 <body>
     <div style="position:fixed;top:24px;right:36px;z-index:100;display:flex;flex-direction:column;gap:14px;align-items:flex-end;">
-      <button id="global-wallet-btn" class="top-btn wallet">Connect Wallet</button>
-      <button id="create-diary-btn" class="top-btn create">Create Diary</button>
+      <button id="global-wallet-btn" class="top-btn wallet" style="width:160px;">Connect Wallet</button>
+      <button id="create-diary-btn" class="top-btn create" style="width:160px;">Create Diary</button>
+    </div>
+    <div style="position:fixed;top:24px;left:36px;z-index:100;display:flex;flex-direction:column;gap:14px;align-items:flex-start;">
+      <button id="chatroom-btn" class="top-btn create" style="min-width:120px;">Chat Room</button>
     </div>
     <div class="container">
         <h1>Blockchain Diary List</h1>
@@ -342,6 +345,16 @@
         <iframe id="editor-iframe" src="" style="width:96vw;min-width:320px;max-width:1400px;height:90vh;min-height:400px;max-height:90vh;border:none;border-radius:18px;background:#fff;"></iframe>
       </div>
     </div>
+    <!-- 聊天室弹窗 -->
+    <div id="chat-modal" style="display:none;position:fixed;z-index:2000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+      <div id="chat-modal-inner" style="background:#fffbe6;padding:0;border-radius:18px;box-shadow:0 8px 32px #e6c15555;max-width:1000px;width:96vw;max-height:96vh;display:flex;flex-direction:column;position:relative;">
+        <button id="close-chat-modal" style="position:absolute;top:12px;right:18px;font-size:1.8em;color:#bfae6a;background:none;border:none;cursor:pointer;z-index:10;">×</button>
+        <iframe id="chat-iframe" src="" style="width:94vw;min-width:320px;max-width:1000px;height:88vh;min-height:400px;max-height:88vh;border:none;border-radius:18px;background:#fff;"></iframe>
+      </div>
+    </div>
+    <!-- Corner decorative images -->
+    <img src="piexel-dog.png" alt="Pixel Dog" style="position:fixed;bottom:24px;left:36px;width:180px;height:180px;object-fit:contain;pointer-events:none;z-index:80;"/>
+    <img src="piexel-dog2.png" alt="Pixel Dog 2" style="position:fixed;bottom:24px;right:36px;width:180px;height:180px;object-fit:contain;pointer-events:none;z-index:80;"/>
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
@@ -515,6 +528,22 @@
     document.getElementById('close-editor-modal').onclick = function() {
       document.getElementById('editor-modal').style.display = 'none';
       document.getElementById('editor-iframe').src = '';
+    };
+    // 聊天室按钮相关逻辑
+    const chatroomBtn = document.getElementById('chatroom-btn');
+    chatroomBtn.onclick = function() {
+      document.getElementById('chat-modal').style.display = 'flex';
+      document.getElementById('chat-iframe').src = 'chat.html';
+    };
+    document.getElementById('close-chat-modal').onclick = function() {
+      document.getElementById('chat-modal').style.display = 'none';
+      document.getElementById('chat-iframe').src = '';
+    };
+    document.getElementById('chat-modal').onclick = function(e) {
+      if (e.target === document.getElementById('chat-modal')) {
+        document.getElementById('chat-modal').style.display = 'none';
+        document.getElementById('chat-iframe').src = '';
+      }
     };
     </script>
 </body>
