@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Room</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary: #FFF9E6;
+      --color-secondary: #FFE699;
+      --color-accent: #FF9966;
+      --color-text: #5A4A39;
+      --color-dark: #3D3023;
+      --font-inter: 'Inter', sans-serif;
+    }
+    
+    @utility smooth-scroll {
+      scroll-behavior: smooth;
+    }
+    
+    @utility message-slide {
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="font-inter bg-primary text-text min-h-screen smooth-scroll">
+  <div class="container mx-auto px-4 py-6 max-w-6xl">
+    <!-- 头部标题 -->
+    <header class="mb-6 text-center">
+      <h1 class="text-3xl md:text-4xl font-bold text-dark mb-2">
+        <i class="fas fa-comments text-accent mr-2"></i>Chat Room
+      </h1>
+      <p class="text-dark/70">Share your feelings with friends and chat freely</p>
+    </header>
+    
+    <div class="flex flex-col lg:flex-row gap-6">
+      <!-- 聊天区域 -->
+      <main class="flex-1 bg-white/80 rounded-xl shadow-lg p-4 lg:p-6">
+        <!-- 消息显示区 -->
+        <div id="message-container" class="h-[500px] lg:h-[600px] overflow-y-auto mb-4 p-4 bg-white/50 rounded-lg">
+          <!-- 系统消息 -->
+          <div class="text-center text-dark/60 mb-4">
+            <i class="fas fa-clock mr-1"></i> Welcome to the chat room
+          </div>
+          
+          <!-- 示例消息 -->
+          <div class="message-group mb-6">
+            <div class="flex items-start mb-2">
+              <img src="https://picsum.photos/32/32?random=1" alt="user avatar" class="w-8 h-8 rounded-full mr-2">
+              <span class="text-sm font-medium text-dark">Alice</span>
+            </div>
+            <div class="bg-secondary/80 text-dark rounded-lg p-3 max-w-[80%] message-slide">
+              Hi everyone! The weather is great today, perfect for chatting~
+              <span class="text-dark/50 text-xs block mt-1">10:23</span>
+            </div>
+          </div>
+          
+          <div class="message-group mb-6">
+            <div class="flex items-start mb-2 justify-end">
+              <span class="text-sm font-medium text-dark mr-2">You</span>
+              <img src="https://picsum.photos/32/32?random=2" alt="your avatar" class="w-8 h-8 rounded-full ml-2">
+            </div>
+            <div class="bg-accent/80 text-white rounded-lg p-3 max-w-[80%] message-slide">
+              Yes, the warm tone of this chat room feels so cozy~
+              <span class="text-white/70 text-xs block mt-1">10:25</span>
+            </div>
+          </div>
+          
+          <div class="message-group">
+            <div class="flex items-start mb-2">
+              <img src="https://picsum.photos/32/32?random=3" alt="user avatar" class="w-8 h-8 rounded-full mr-2">
+              <span class="text-sm font-medium text-dark">Sunny</span>
+            </div>
+            <div class="bg-secondary/80 text-dark rounded-lg p-3 max-w-[80%] message-slide">
+              <i class="fas fa-smile text-accent mr-1"></i> I also like this pale yellow style, so warm~
+              <span class="text-dark/50 text-xs block mt-1">10:26</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 消息输入区 -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="flex-1 relative">
+            <input 
+              id="message-input" 
+              type="text" 
+              placeholder="Type a message..." 
+              class="w-full p-3 bg-white border border-secondary/50 rounded-lg focus:outline-none focus:border-accent"
+            >
+            <div id="emoji-picker" class="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 hover:text-accent cursor-pointer">
+              <i class="fas fa-smile"></i>
+            </div>
+          </div>
+          <button 
+            id="send-button" 
+            class="bg-accent hover:bg-accent/90 text-white font-medium px-4 py-3 rounded-lg transition-colors"
+          >
+            <i class="fas fa-paper-plane mr-1"></i> Send
+          </button>
+        </div>
+      </main>
+      
+      <!-- 侧边栏：用户列表 -->
+      <aside class="w-full lg:w-64 bg-white/80 rounded-xl shadow-lg p-4">
+        <h2 class="text-xl font-bold text-dark mb-4 flex items-center">
+          <i class="fas fa-users text-accent mr-2"></i> Online Users (<span id="online-count">0</span>)
+        </h2>
+        <div id="user-list" class="space-y-3"></div>
+        <div class="mt-6 p-3 bg-secondary/30 rounded-lg">
+          <h3 class="font-medium text-dark mb-2">Chatroom Rules</h3>
+          <ul class="text-sm text-dark/70 space-y-1">
+            <li class="flex items-start"><i class="fas fa-check text-accent mt-1 mr-1"></i><span>Please speak politely and respect others</span></li>
+            <li class="flex items-start"><i class="fas fa-check text-accent mt-1 mr-1"></i><span>No advertising or illegal content</span></li>
+            <li class="flex items-start"><i class="fas fa-check text-accent mt-1 mr-1"></i><span>Maintain a friendly atmosphere and enjoy chatting</span></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- 表情选择器（默认隐藏） -->
+  <div id="emoji-panel" class="fixed bottom-20 right-4 bg-white rounded-lg shadow-xl p-3 z-50 hidden">
+    <div class="grid grid-cols-6 gap-2">
+      <button class="emoji-btn" data-emoji="😀">😀</button>
+      <button class="emoji-btn" data-emoji="😄">😄</button>
+      <button class="emoji-btn" data-emoji="😊">😊</button>
+      <button class="emoji-btn" data-emoji="😍">😍</button>
+      <button class="emoji-btn" data-emoji="😎">😎</button>
+      <button class="emoji-btn" data-emoji="😜">😜</button>
+      <button class="emoji-btn" data-emoji="😂">😂</button>
+      <button class="emoji-btn" data-emoji="🥰">🥰</button>
+      <button class="emoji-btn" data-emoji="😢">😢</button>
+      <button class="emoji-btn" data-emoji="😤">😤</button>
+      <button class="emoji-btn" data-emoji="😎">😎</button>
+      <button class="emoji-btn" data-emoji="👍">👍</button>
+      <button class="emoji-btn" data-emoji="👏">👏</button>
+      <button class="emoji-btn" data-emoji="❤️">❤️</button>
+      <button class="emoji-btn" data-emoji="🎉">🎉</button>
+      <button class="emoji-btn" data-emoji="📷">📷</button>
+      <button class="emoji-btn" data-emoji="🍕">🍕</button>
+      <button class="emoji-btn" data-emoji="🍹">🍹</button>
+    </div>
+  </div>
+
+  <!-- Cooldown alert popup -->
+  <div id="cooldown-alert" class="fixed top-20 left-1/2 -translate-x-1/2 bg-red-600 text-white font-medium px-4 py-2 rounded-lg shadow-lg hidden z-50">
+    Please wait 5 seconds before sending another message.
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded, onChildRemoved, onDisconnect, set, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    // Firebase 配置（与日记列表相同）
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5Z5ieEbAcfQX0kxGSn9ldGXhzvAwx_8M",
+      authDomain: "chat-294cc.firebaseapp.com",
+      databaseURL: "https://chat-294cc-default-rtdb.firebaseio.com",
+      projectId: "chat-294cc",
+      storageBucket: "chat-294cc.firebasestorage.app",
+      messagingSenderId: "913615304269",
+      appId: "1:913615304269:web:0274ffaccb8e6b678e4e04",
+      measurementId: "G-SJR9NDW86B"
+    };
+
+    // 初始化 Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, 'chatMessages');
+
+    // DOM
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const messageContainer = document.getElementById('message-container');
+    const emojiPicker = document.getElementById('emoji-picker');
+    const emojiPanel = document.getElementById('emoji-panel');
+    const emojiBtns = document.querySelectorAll('.emoji-btn');
+
+    // 清空示例消息
+    messageContainer.innerHTML = '';
+
+    // 当前钱包地址（从父页面获取）
+    let currentWallet = '';
+    try {
+      currentWallet = window.parent && window.parent.currentWallet ? window.parent.currentWallet : '';
+    } catch (e) {}
+
+    // 格式化地址
+    function shortAddr(addr) {
+      if (!addr || addr.length < 8) return addr || 'Anonymous';
+      return addr.slice(0,4)+'...'+addr.slice(-6);
+    }
+
+    // HTML 转义
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, (tag) => {
+        const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        return chars[tag] || tag;
+      });
+    }
+
+    // 追加消息到页面
+    function appendMessage(msg) {
+      const isSelf = currentWallet && msg.wallet === currentWallet;
+      const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+
+      const messageGroup = document.createElement('div');
+      messageGroup.className = 'message-group mb-6';
+
+      if (isSelf) {
+        messageGroup.innerHTML = `
+          <div class="flex items-start mb-2 justify-end">
+            <span class="text-sm font-medium text-dark mr-2">${shortAddr(msg.wallet || 'You')}</span>
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${msg.wallet || 'you'}" alt="avatar" class="w-8 h-8 rounded-full ml-2">
+          </div>
+          <div class="bg-accent/80 text-white rounded-lg p-3 max-w-[80%] message-slide">
+            ${escapeHtml(msg.text || '')}
+            <span class="text-white/70 text-xs block mt-1">${timeStr}</span>
+          </div>
+        `;
+      } else {
+        messageGroup.innerHTML = `
+          <div class="flex items-start mb-2">
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${msg.wallet || 'anon'}" alt="avatar" class="w-8 h-8 rounded-full mr-2">
+            <span class="text-sm font-medium text-dark">${shortAddr(msg.wallet) || 'Anonymous'}</span>
+          </div>
+          <div class="bg-secondary/80 text-dark rounded-lg p-3 max-w-[80%] message-slide">
+            ${escapeHtml(msg.text || '')}
+            <span class="text-dark/50 text-xs block mt-1">${timeStr}</span>
+          </div>
+        `;
+      }
+
+      messageContainer.appendChild(messageGroup);
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+    // Rate-limit: at most one message every 5 seconds
+    let lastSentTime = 0;
+    const cooldownAlert = document.getElementById('cooldown-alert');
+    function showCooldownAlert(){
+      cooldownAlert.classList.remove('hidden');
+      setTimeout(()=>{
+        cooldownAlert.classList.add('hidden');
+      },1500);
+    }
+
+    function sendMessage() {
+      const now = Date.now();
+      if (now - lastSentTime < 5000) {
+        showCooldownAlert();
+        return;
+      }
+
+      const text = messageInput.value.trim();
+      if (!text) return;
+
+      const data = {
+        text,
+        timestamp: now,
+        wallet: currentWallet || ''
+      };
+      push(messagesRef, data);
+      messageInput.value = '';
+      lastSentTime = now;
+
+      // disable button for cooldown visual
+      sendButton.disabled = true;
+      sendButton.classList.add('opacity-50', 'cursor-not-allowed');
+      setTimeout(() => {
+        sendButton.disabled = false;
+        sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      }, 5000);
+    }
+
+    // 监听新消息
+    onChildAdded(query(messagesRef, limitToLast(100)), (snapshot) => {
+      const msg = snapshot.val();
+      appendMessage(msg);
+    });
+
+    // 事件监听
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // 表情选择器逻辑
+    emojiPicker.addEventListener('click', () => {
+      emojiPanel.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!emojiPicker.contains(e.target) && !emojiPanel.contains(e.target)) {
+        emojiPanel.classList.add('hidden');
+      }
+    });
+
+    emojiBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const emoji = btn.getAttribute('data-emoji');
+        messageInput.value += emoji;
+        emojiPanel.classList.add('hidden');
+      });
+    });
+
+    const userListEl = document.getElementById('user-list');
+    const onlineCountEl = document.getElementById('online-count');
+    const presenceRef = ref(db, 'presence');
+
+    // 生成唯一用户ID
+    const userId = currentWallet || ('anon_'+Math.random().toString(36).slice(2,10));
+
+    // 注册自己的 presence
+    const ownPresenceRef = ref(db, `presence/${encodeURIComponent(userId)}`);
+    set(ownPresenceRef, { wallet: currentWallet || '', ts: Date.now() });
+    onDisconnect(ownPresenceRef).remove();
+
+    // 在线用户列表维护
+    const onlineUsers = new Map();
+    let showAllUsers = false;
+
+    function renderUserList() {
+      userListEl.innerHTML = '';
+      const entries = Array.from(onlineUsers.entries());
+      const visible = showAllUsers ? entries : entries.slice(0,5);
+      visible.forEach(([key,val])=>{
+        const div = document.createElement('div');
+        div.className = 'flex items-center p-2 rounded-lg hover:bg-secondary/30';
+        div.innerHTML = `
+          <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${key}" class="w-8 h-8 rounded-full"/>
+          <span class="ml-2 text-dark ${key===userId? 'font-medium' : ''}">${shortAddr(val.wallet||key)}</span>
+          <span class="ml-auto text-xs bg-green-100 text-green-80 px-2 py-0.5 rounded-full">Online</span>
+        `;
+        userListEl.appendChild(div);
+      });
+      // toggle row if needed
+      if(entries.length>5){
+        const toggleDiv = document.createElement('div');
+        toggleDiv.className = 'text-center text-sm text-dark/60 cursor-pointer hover:text-accent';
+        toggleDiv.textContent = showAllUsers ? 'Show less' : `+ ${entries.length - 5} more`; 
+        toggleDiv.onclick = ()=>{ showAllUsers = !showAllUsers; renderUserList(); };
+        userListEl.appendChild(toggleDiv);
+      }
+      onlineCountEl.textContent = onlineUsers.size;
+    }
+
+    onChildAdded(presenceRef, snap => {
+      onlineUsers.set(snap.key, snap.val());
+      renderUserList();
+    });
+
+    onChildRemoved(presenceRef, snap => {
+      onlineUsers.delete(snap.key);
+      renderUserList();
+    });
+  </script>
+</body>
+</html>
