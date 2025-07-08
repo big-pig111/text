@@ -308,12 +308,29 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* Loading spinner */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 64px; height: 64px;
+            margin: -32px 0 0 -32px;
+            border: 6px solid #ffe08255;
+            border-top-color: #e6c155;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            z-index: 20;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div style="position:fixed;top:24px;right:36px;z-index:100;display:flex;flex-direction:column;gap:14px;align-items:flex-end;">
       <button id="global-wallet-btn" class="top-btn wallet" style="width:160px;">Connect Wallet</button>
       <button id="create-diary-btn" class="top-btn create" style="width:160px;">Create Diary</button>
+      <!-- Language toggle button -->
+      <button id="language-btn" class="top-btn wallet" style="width:160px;">繁體中文</button>
     </div>
     <div style="position:fixed;top:24px;left:36px;z-index:100;display:flex;flex-direction:column;gap:14px;align-items:flex-start;">
       <button id="chatroom-btn" class="top-btn create" style="min-width:120px;">Chat Room</button>
@@ -321,7 +338,7 @@
     <div class="container">
         <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:36px;">
           <img src="t.png" alt="Logo" style="width:56px;height:56px;object-fit:contain;"/>
-          <h1 style="margin:0;">Blockchain Diary List</h1>
+          <h1 id="main-title" style="margin:0;">Blockchain Diary List</h1>
         </div>
         <div class="diary-list-wrap">
           <div class="tab-bar" id="tabBar" style="display:flex;gap:18px;justify-content:center;margin-bottom:0;">
@@ -345,6 +362,7 @@
     <div id="editor-modal" style="display:none;position:fixed;z-index:2000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
       <div id="editor-modal-inner" style="background:#fffbe6;padding:0;border-radius:18px;box-shadow:0 8px 32px #e6c15555;max-width:1400px;width:98vw;max-height:98vh;display:flex;flex-direction:column;position:relative;">
         <button id="close-editor-modal" style="position:absolute;top:12px;right:18px;font-size:1.8em;color:#bfae6a;background:none;border:none;cursor:pointer;z-index:10;">×</button>
+        <div id="editor-loading" class="spinner"></div>
         <iframe id="editor-iframe" src="" style="width:96vw;min-width:320px;max-width:1400px;height:90vh;min-height:400px;max-height:90vh;border:none;border-radius:18px;background:#fff;"></iframe>
       </div>
     </div>
@@ -352,6 +370,7 @@
     <div id="chat-modal" style="display:none;position:fixed;z-index:2000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
       <div id="chat-modal-inner" style="background:#fffbe6;padding:0;border-radius:18px;box-shadow:0 8px 32px #e6c15555;max-width:1000px;width:96vw;max-height:96vh;display:flex;flex-direction:column;position:relative;">
         <button id="close-chat-modal" style="position:absolute;top:12px;right:18px;font-size:1.8em;color:#bfae6a;background:none;border:none;cursor:pointer;z-index:10;">×</button>
+        <div id="chat-loading" class="spinner"></div>
         <iframe id="chat-iframe" src="" style="width:94vw;min-width:320px;max-width:1000px;height:88vh;min-height:400px;max-height:88vh;border:none;border-radius:18px;background:#fff;"></iframe>
       </div>
     </div>
@@ -361,7 +380,7 @@
     <!-- Chat summary sidebar -->
     <div id="chat-summary" style="position:fixed;top:100px;left:36px;width:180px;z-index:90;background:rgba(255,255,255,0.7);box-shadow:0 4px 18px #e6c15533;border-radius:18px;padding:14px 12px;display:flex;flex-direction:column;gap:10px;">
       <div style="font-weight:900;color:#bfae6a;font-size:1.05em;display:flex;align-items:center;gap:6px;">
-        <i class="fas fa-comment-dots"></i> Recent Chats
+        <i class="fas fa-comment-dots"></i> <span id="chat-summary-title">Recent Chats</span>
       </div>
       <ul id="chatSummaryList" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:0.9em;color:#6d5c1c;max-height:220px;overflow:auto;"></ul>
     </div>
@@ -380,10 +399,78 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+
+    /* ============== i18n section ============== */
+    const langTexts = {
+      'en': {
+        connectWallet: 'Connect Wallet',
+        createDiary: 'Create Diary',
+        chatRoom: 'Chat Room',
+        blockchainDiaryList: 'Blockchain Diary List',
+        publicDiaries: 'Public Diaries',
+        privateDiaries: 'My Private Diaries',
+        walletTip: 'Please connect your wallet to view private diaries',
+        emptyTip: 'No diaries yet, write one now!',
+        emptyTipNoWallet: 'Please connect your wallet to view your private diaries',
+        clickToView: 'Click to view full text',
+        recentChats: 'Recent Chats',
+        untitled: 'Untitled',
+        anonymous: 'Anonymous'
+      },
+      'zh-TW': {
+        connectWallet: '連接錢包',
+        createDiary: '創建日記',
+        chatRoom: '聊天室',
+        blockchainDiaryList: '區塊鏈日記列表',
+        publicDiaries: '公開日記',
+        privateDiaries: '我的私密日記',
+        walletTip: '請連接您的錢包以查看私密日記',
+        emptyTip: '尚未有日記，立即開始撰寫！',
+        emptyTipNoWallet: '請連接您的錢包以查看您的私密日記',
+        clickToView: '點擊查看全文',
+        recentChats: '近期聊天',
+        untitled: '未命名',
+        anonymous: '匿名'
+      }
+    };
+
+    let currentLang = 'zh-TW';
+    function t(key){ return langTexts[currentLang][key] || key; }
+
+    function applyLanguage(){
+      // buttons on top right
+      if(!currentWallet){ globalWalletBtn.textContent = t('connectWallet'); }
+      document.getElementById('create-diary-btn').textContent = t('createDiary');
+      document.getElementById('language-btn').textContent = currentLang === 'en' ? '繁體中文' : 'English';
+      // top left chatroom button
+      document.getElementById('chatroom-btn').textContent = t('chatRoom');
+      // page title
+      document.getElementById('main-title').textContent = t('blockchainDiaryList');
+      // tabs
+      document.getElementById('tab-public').textContent = t('publicDiaries');
+      document.getElementById('tab-private').textContent = t('privateDiaries');
+      // wallet tip
+      document.getElementById('wallet-tip').textContent = t('walletTip');
+      // chat summary title
+      const chatSumTitle = document.getElementById('chat-summary-title');
+      if(chatSumTitle) chatSumTitle.textContent = t('recentChats');
+      // re-render current tab so empty tips & diaries localize
+      renderCurrentTab();
+    }
+
+    function toggleLanguage(){
+      currentLang = currentLang === 'en' ? 'zh-TW' : 'en';
+      applyLanguage();
+    }
+
+    document.getElementById('language-btn').onclick = toggleLanguage;
+    /* ============ end i18n section ============ */
     // 钱包连接（仅用于私密日记过滤）
     let currentWallet = '';
     // 全局钱包连接按钮
     const globalWalletBtn = document.getElementById('global-wallet-btn');
+    // 初始应用语言（需在按钮元素已获取后调用）
+    applyLanguage();
     function shortAddr(addr) {
       if (!addr || addr.length < 8) return addr;
       return addr.slice(0, 4) + '...' + addr.slice(-6);
@@ -434,18 +521,18 @@
         if (!currentWallet) {
           document.getElementById('wallet-tip').style.display = '';
           renderDiaries([]);
-          emptyTip.textContent = 'Please connect your wallet to view your private diaries';
+          emptyTip.textContent = t('emptyTipNoWallet');
           emptyTip.style.display = '';
           return;
         }
         document.getElementById('wallet-tip').style.display = 'none';
-        emptyTip.textContent = 'No diaries yet, write one now!';
+        emptyTip.textContent = t('emptyTip');
         const privateDiaries = allDiaries.filter(d => d.public === false && d.wallet === currentWallet);
         renderDiaries(privateDiaries);
       } else {
         document.getElementById('wallet-tip').style.display = 'none';
         const emptyTip = document.getElementById('emptyTip');
-        emptyTip.textContent = 'No diaries yet, write one now!';
+        emptyTip.textContent = t('emptyTip');
         const publicDiaries = allDiaries.filter(d => d.public !== false);
         renderDiaries(publicDiaries);
       }
@@ -474,16 +561,16 @@
       diaries.forEach((d) => {
         const card = document.createElement('div');
         card.className = 'diary-card';
-        card.title = 'Click to view full text';
+        card.title = t('clickToView');
         // 标题
-        let title = d.title ? d.title : 'Untitled';
+        let title = d.title ? d.title : t('untitled');
         // 只显示前120字
         let preview = d.content ? (d.content.length > 120 ? d.content.slice(0, 120) + '...' : d.content) : '';
         card.innerHTML = `
           <div class="diary-title-preview">${escapeHtml(title)}</div>
           <div class="diary-content-preview">${escapeHtml(preview)}</div>
           <div class="diary-meta">
-            <span class="author">${d.wallet ? (d.wallet.slice(0,4)+'...'+d.wallet.slice(-6)) : 'Anonymous'}</span>
+            <span class="author">${d.wallet ? (d.wallet.slice(0,4)+'...'+d.wallet.slice(-6)) : t('anonymous')}</span>
             <span class="date">${formatDate(d.timestamp)}</span>
           </div>
         `;
@@ -494,10 +581,10 @@
     // 弹窗显示全文
     function showModal(diary) {
       let txHtml = diary.txid ? `<a href=\"https://solscan.io/tx/${diary.txid}\" target=\"_blank\">Solscan</a>` : '';
-      document.getElementById('modalTitle').innerHTML = escapeHtml(diary.title||'Untitled');
+      document.getElementById('modalTitle').innerHTML = escapeHtml(diary.title||t('untitled'));
       document.getElementById('modalContent').innerHTML = escapeHtml(diary.content||'');
       document.getElementById('modalFooter').innerHTML = `
-        <span class="author">${diary.wallet ? (diary.wallet.slice(0,4)+'...'+diary.wallet.slice(-6)) : 'Anonymous'}</span>
+        <span class="author">${diary.wallet ? (diary.wallet.slice(0,4)+'...'+diary.wallet.slice(-6)) : t('anonymous')}</span>
         <span class="date">${formatDate(diary.timestamp)}</span>
         ${txHtml}
       `;
@@ -528,31 +615,43 @@
     fetchDiaries(function(diaries){
       allDiaries = diaries;
       renderCurrentTab();
+      applyLanguage(); // ensure language applied after data load
     });
     setTab('public');
-    // 创建日记按钮
+    // 创建日记按钮 + 加载动画
+    const editorIframe = document.getElementById('editor-iframe');
+    const editorLoading = document.getElementById('editor-loading');
     document.getElementById('create-diary-btn').onclick = function() {
+      editorLoading.style.display = 'block';
       document.getElementById('editor-modal').style.display = 'flex';
-      document.getElementById('editor-iframe').src = 'Untitled.html';
+      editorIframe.src = 'Untitled.html';
     };
+    editorIframe.onload = () => { editorLoading.style.display = 'none'; };
     document.getElementById('close-editor-modal').onclick = function() {
       document.getElementById('editor-modal').style.display = 'none';
-      document.getElementById('editor-iframe').src = '';
+      editorIframe.src = '';
+      editorLoading.style.display = 'none';
     };
     // 聊天室按钮相关逻辑
     const chatroomBtn = document.getElementById('chatroom-btn');
+    const chatIframe = document.getElementById('chat-iframe');
+    const chatLoading = document.getElementById('chat-loading');
     chatroomBtn.onclick = function() {
+      chatLoading.style.display = 'block';
       document.getElementById('chat-modal').style.display = 'flex';
-      document.getElementById('chat-iframe').src = 'chat.html';
+      chatIframe.src = 'chat.html';
     };
+    chatIframe.onload = () => { chatLoading.style.display = 'none'; };
     document.getElementById('close-chat-modal').onclick = function() {
       document.getElementById('chat-modal').style.display = 'none';
-      document.getElementById('chat-iframe').src = '';
+      chatIframe.src = '';
+      chatLoading.style.display = 'none';
     };
     document.getElementById('chat-modal').onclick = function(e) {
       if (e.target === document.getElementById('chat-modal')) {
         document.getElementById('chat-modal').style.display = 'none';
-        document.getElementById('chat-iframe').src = '';
+        chatIframe.src = '';
+        chatLoading.style.display = 'none';
       }
     };
     // Chat summary rendering
