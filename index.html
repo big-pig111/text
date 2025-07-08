@@ -469,12 +469,12 @@
     let currentWallet = '';
     // 全局钱包连接按钮
     const globalWalletBtn = document.getElementById('global-wallet-btn');
-    // 初始应用语言（需在按钮元素已获取后调用）
-    applyLanguage();
+    // 生成短地址展示
     function shortAddr(addr) {
       if (!addr || addr.length < 8) return addr;
       return addr.slice(0, 4) + '...' + addr.slice(-6);
     }
+    // 連接 Phantom 錢包
     async function connectWalletGlobal() {
       if (window.solana && window.solana.isPhantom) {
         try {
@@ -489,17 +489,6 @@
       }
     }
     globalWalletBtn.onclick = connectWalletGlobal;
-    // 页面加载时自动检测钱包
-    window.addEventListener('load', async () => {
-      if (window.solana && window.solana.isPhantom && window.solana.isConnected) {
-        try {
-          const resp = await window.solana.connect({ onlyIfTrusted: true });
-          currentWallet = resp.publicKey.toString();
-          globalWalletBtn.textContent = shortAddr(currentWallet);
-          renderCurrentTab();
-        } catch (e) {}
-      }
-    });
     document.getElementById('tab-private').onclick = function() {
       setTab('private');
     };
@@ -515,6 +504,8 @@
     }
     let allDiaries = [];
     let currentTab = 'public';
+    // 初始套用語言，現在 currentTab 已定義
+    applyLanguage();
     function renderCurrentTab() {
       if (currentTab === 'private') {
         const emptyTip = document.getElementById('emptyTip');
